@@ -8,7 +8,7 @@ volumes:
     path: /var/run/docker.sock
 steps:
 - name: feature_test
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   commands:
   - eden ci run test
   environment:
@@ -22,7 +22,7 @@ steps:
   - name: temp
     path: /go
 - name: feature_build
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   commands:
   - eden ci run build
   environment:
@@ -36,7 +36,7 @@ steps:
   - name: temp
     path: /go
 - name: feature_ship
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
   commands:
   - eden ci ship --push
   environment:
@@ -50,7 +50,7 @@ steps:
   - name: temp
     path: /go
 - name: feature_deploy
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
   commands:
   - eden ci deploy
   environment:
@@ -64,7 +64,7 @@ steps:
   - name: temp
     path: /go
 - name: testFeature_test
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   commands:
   - eden ci run test
   environment:
@@ -78,7 +78,7 @@ steps:
   - name: temp
     path: /go
 - name: testFeature_build
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   commands:
   - eden ci run build
   environment:
@@ -92,7 +92,7 @@ steps:
   - name: temp
     path: /go
 - name: testFeature_ship
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
   commands:
   - eden ci ship --push
   environment:
@@ -106,7 +106,7 @@ steps:
   - name: temp
     path: /go
 - name: testFeature_deploy
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
   commands:
   - eden ci deploy
   environment:
@@ -120,7 +120,7 @@ steps:
   - name: temp
     path: /go
 - name: demoFeature_test
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   commands:
   - eden ci run test
   environment:
@@ -134,7 +134,7 @@ steps:
   - name: temp
     path: /go
 - name: demoFeature_build
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   commands:
   - eden ci run build
   environment:
@@ -148,7 +148,7 @@ steps:
   - name: temp
     path: /go
 - name: demoFeature_ship
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
   commands:
   - eden ci ship --push
   environment:
@@ -162,7 +162,7 @@ steps:
   - name: temp
     path: /go
 - name: demoFeature_deploy
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
   commands:
   - eden ci deploy
   environment:
@@ -176,7 +176,7 @@ steps:
   - name: temp
     path: /go
 - name: master_test
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   commands:
   - eden ci run test
   environment:
@@ -190,7 +190,7 @@ steps:
   - name: temp
     path: /go
 - name: master_build
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   commands:
   - eden ci run build
   environment:
@@ -204,7 +204,7 @@ steps:
   - name: temp
     path: /go
 - name: master_ship
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onship:1.14
   commands:
   - eden ci ship --push
   environment:
@@ -220,7 +220,7 @@ steps:
   - name: docker
     path: /var/run/docker.sock
 - name: master_deploy
-  image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
   commands:
   - eden ci deploy --env=STAGING
   - eden ci deploy --env=TEST
