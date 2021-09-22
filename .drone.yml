@@ -3,8 +3,9 @@ type: docker
 volumes:
 - name: temp
   temp: {}
-- name: host
-  temp: {}
+- name: docker
+  host:
+    path: /var/run/docker.sock
 steps:
 - name: feature_test
   image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
@@ -216,7 +217,7 @@ steps:
   volumes:
   - name: temp
     path: /go
-  - name: host
+  - name: docker
     path: /var/run/docker.sock
 - name: master_deploy
   image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
