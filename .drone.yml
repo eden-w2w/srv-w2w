@@ -214,6 +214,8 @@ steps:
   volumes:
   - name: temp
     path: /go
+  - name: temp
+    path: /var/run/docker.sock
 - name: master_deploy
   image: registry.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
   commands:
