@@ -1,0 +1,6 @@
+srv_w2w
+srv-w2w
+.idea
+go.sum
+build/configs/local.yml
+api/openapi.json
