@@ -13,6 +13,12 @@ import (
 type InventoryLock func(db sqlx.DBExecutor, goodsID uint64, amount uint32) error
 type InventoryUnlock func(db sqlx.DBExecutor, goodsID uint64, amount uint32) error
 
+type EventHandler interface {
+	OnOrderCreateEvent(db sqlx.DBExecutor, order *databases.Order) error
+	OnOrderPaidEvent(db sqlx.DBExecutor, order *databases.Order) error
+	OnOrderCompleteEvent(db sqlx.DBExecutor, order *databases.Order) error
+}
+
 type CreateOrderParams struct {
 	// 用户ID
 	UserID uint64 `in:"body" default:"" json:"userID,string"`

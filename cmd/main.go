@@ -4,7 +4,9 @@ import (
 	"github.com/eden-framework/context"
 	"github.com/eden-framework/eden-framework/pkg/application"
 	"github.com/eden-framework/sqlx/migration"
+	"github.com/eden-w2w/srv-w2w/internal/modules/events"
 	"github.com/eden-w2w/srv-w2w/internal/modules/goods"
+	"github.com/eden-w2w/srv-w2w/internal/modules/order"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -19,7 +21,6 @@ var cmdMigrationDryRun bool
 func main() {
 	app := application.NewApplication(runner,
 		application.WithConfig(&global.Config),
-		application.WithApollo(&global.ApolloConfig),
 		application.WithConfig(&databases.Config))
 
 	cmdMigrate := &cobra.Command{
@@ -40,6 +41,7 @@ func runner(ctx *context.WaitStopContext) error {
 	logrus.SetLevel(global.Config.LogLevel)
 	internal.Generator = internal.NewSnowflake(global.Config.SnowflakeConfig)
 	goods.GetController()
+	order.GetController().WithEventHandler(events.GetOrderEvent())
 
 	go global.Config.GRPCServer.Serve(ctx, routers.Router)
 	return global.Config.HTTPServer.Serve(ctx, routers.Router)

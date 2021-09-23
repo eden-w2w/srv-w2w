@@ -12,18 +12,27 @@ import (
 	"github.com/eden-w2w/srv-w2w/internal/databases"
 )
 
-var controller = NewController(global.Config.MasterDB)
+var controller *Controller
 
 func GetController() *Controller {
+	if controller == nil {
+		controller = NewController(global.Config.MasterDB)
+	}
 	return controller
 }
 
 type Controller struct {
-	db sqlx.DBExecutor
+	db           sqlx.DBExecutor
+	eventHandler EventHandler
 }
 
 func NewController(db sqlx.DBExecutor) *Controller {
 	return &Controller{db: db}
+}
+
+func (c *Controller) WithEventHandler(h EventHandler) *Controller {
+	c.eventHandler = h
+	return c
 }
 
 func (c Controller) CreateOrder(p CreateOrderParams, locker InventoryLock) (*databases.Order, error) {
@@ -110,6 +119,12 @@ func (c Controller) CreateOrder(p CreateOrderParams, locker InventoryLock) (*dat
 		}
 		return nil
 	})
+
+	// 执行创建事件
+	tx = tx.With(func(db sqlx.DBExecutor) error {
+		return c.eventHandler.OnOrderCreateEvent(db, order)
+	})
+
 	err := tx.Do()
 	if err != nil {
 		logrus.Errorf("[CreateOrder] err: %v, params: %+v", err, p)
@@ -119,9 +134,13 @@ func (c Controller) CreateOrder(p CreateOrderParams, locker InventoryLock) (*dat
 	return order, nil
 }
 
-func (c Controller) GetOrder(orderID, userID uint64) (*databases.Order, error) {
-	order := &databases.Order{OrderID: orderID}
-	err := order.FetchByOrderID(c.db)
+func (c Controller) GetOrder(orderID, userID uint64, forUpdate bool, db sqlx.DBExecutor) (order *databases.Order, err error) {
+	order = &databases.Order{OrderID: orderID}
+	if forUpdate {
+		err = order.FetchByOrderIDForUpdate(db)
+	} else {
+		err = order.FetchByOrderID(c.db)
+	}
 	if err != nil {
 		if sqlx.DBErr(err).IsNotFound() {
 			return nil, errors.OrderNotFound
@@ -169,15 +188,26 @@ func (c Controller) UpdateOrderStatusWithDB(db sqlx.DBExecutor, orderID uint64, 
 	}
 
 	// TODO 状态流转检查
+
+	// 变更订单状态
 	f := builder.FieldValues{
 		"Status": status,
 	}
-	err = order.UpdateByIDWithMap(c.db, f)
+	order.Status = status
+	err = order.UpdateByIDWithMap(db, f)
 	if err != nil {
-		logrus.Errorf("[UpdateOrderStatus] order.UpdateByIDWithStruct err: %v, orderID: %d, status: %s", err, orderID, status.String())
+		logrus.Errorf("[UpdateOrderStatus] order.UpdateByIDWithMap err: %v, orderID: %d, status: %s", err, orderID, status.String())
 		return errors.InternalError
 	}
-	return nil
+
+	// 执行状态变更事件
+	switch order.Status {
+	case enums.ORDER_STATUS__PAID:
+		err = c.eventHandler.OnOrderPaidEvent(db, order)
+	case enums.ORDER_STATUS__COMPLETE:
+		err = c.eventHandler.OnOrderCompleteEvent(db, order)
+	}
+	return err
 }
 
 func (c Controller) UpdateOrderStatus(orderID uint64, status enums.OrderStatus) error {
@@ -185,17 +215,21 @@ func (c Controller) UpdateOrderStatus(orderID uint64, status enums.OrderStatus) 
 }
 
 func (c Controller) CancelOrder(orderID, userID uint64, unlocker InventoryUnlock) error {
-	order, err := c.GetOrder(orderID, userID)
-	if err != nil {
-		return err
-	}
-
-	if order.Status == enums.ORDER_STATUS__CANCEL {
-		logrus.Errorf("[CancelOrder] order.Status == enums.ORDER_STATUS__CANCEL, order.UserID=%d, userID=%d", order.UserID, userID)
-		return errors.OrderCanceled
-	}
-
+	var order *databases.Order
+	var err error
 	tx := sqlx.NewTasks(c.db)
+	tx = tx.With(func(db sqlx.DBExecutor) error {
+		order, err = c.GetOrder(orderID, userID, true, db)
+		if err != nil {
+			return err
+		}
+
+		if order.Status == enums.ORDER_STATUS__CANCEL {
+			return errors.OrderCanceled
+		}
+		return nil
+	})
+
 	tx = tx.With(func(db sqlx.DBExecutor) error {
 		return c.UpdateOrderStatusWithDB(db, orderID, enums.ORDER_STATUS__CANCEL)
 	})
@@ -218,7 +252,7 @@ func (c Controller) CancelOrder(orderID, userID uint64, unlocker InventoryUnlock
 
 	err = tx.Do()
 	if err != nil {
-		logrus.Errorf("[CancelOrder] tx.Do() err: %v", err)
+		logrus.Errorf("[CancelOrder] tx.Do() err: %v, orderID: %d, userID: %d", err, orderID, userID)
 	}
 	return err
 }

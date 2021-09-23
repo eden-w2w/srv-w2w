@@ -5,7 +5,6 @@ go 1.16
 replace k8s.io/client-go => k8s.io/client-go v0.18.8
 
 require (
-	github.com/eden-framework/apollo v0.0.1
 	github.com/eden-framework/context v0.0.2
 	github.com/eden-framework/courier v1.0.5
 	github.com/eden-framework/eden-framework v1.1.9

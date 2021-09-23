@@ -32,27 +32,27 @@ type UpdateUserInfoParams struct {
 
 func (p UpdateUserInfoParams) Diff(model *databases.User) (change bool) {
 	change = false
-	if p.UserName != model.UserName {
+	if p.UserName != "" && p.UserName != model.UserName {
 		model.UserName = p.UserName
 		change = true
 	}
-	if p.Mobile != model.Mobile {
+	if p.Mobile != "" && p.Mobile != model.Mobile {
 		model.Mobile = p.Mobile
 		change = true
 	}
-	if p.NickName != model.NickName {
+	if p.NickName != "" && p.NickName != model.NickName {
 		model.NickName = p.NickName
 		change = true
 	}
-	if p.AvatarUrl != model.AvatarUrl {
+	if p.AvatarUrl != "" && p.AvatarUrl != model.AvatarUrl {
 		model.AvatarUrl = p.AvatarUrl
 		change = true
 	}
-	if model.RefererID == 0 && p.RefererID != 0 {
+	if p.RefererID != 0 && model.RefererID == 0 && model.UserID != p.RefererID {
 		model.RefererID = p.RefererID
 		change = true
 	}
-	if p.SessionKey != model.SessionKey {
+	if p.SessionKey != "" && p.SessionKey != model.SessionKey {
 		model.SessionKey = p.SessionKey
 		change = true
 	}

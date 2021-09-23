@@ -29,7 +29,7 @@ func (req GetMyOrderByID) Output(ctx context.Context) (result interface{}, err e
 	if user == nil {
 		return nil, errors.Unauthorized
 	}
-	o, err := order.GetController().GetOrder(req.OrderID, user.UserID)
+	o, err := order.GetController().GetOrder(req.OrderID, user.UserID, false, nil)
 	if err != nil {
 		return nil, err
 	}
