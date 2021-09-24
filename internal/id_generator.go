@@ -2,6 +2,7 @@ package internal
 
 import (
 	"errors"
+	"github.com/sirupsen/logrus"
 	"strconv"
 	"sync"
 	"time"
@@ -14,12 +15,19 @@ const (
 	encodeBase58Map = "123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ"
 )
 
-var Generator *GeneratorSnowFlake
+var generator *GeneratorSnowFlake
 
 var decodeBase32Map [256]byte
 var decodeBase58Map [256]byte
 
-func NewSnowflake(config global.SnowflakeConfig) *GeneratorSnowFlake {
+func GetGenerator() *GeneratorSnowFlake {
+	if generator == nil {
+		generator = newSnowflake(global.Config.SnowflakeConfig)
+	}
+	return generator
+}
+
+func newSnowflake(config global.SnowflakeConfig) *GeneratorSnowFlake {
 	for i := 0; i < len(encodeBase58Map); i++ {
 		decodeBase58Map[i] = 0xFF
 	}
@@ -50,7 +58,10 @@ func NewSnowflake(config global.SnowflakeConfig) *GeneratorSnowFlake {
 		nodeShift:        config.StepBits,
 		currentNodeIndex: 0,
 	}
-	generator.initGenerator()
+	err := generator.initGenerator()
+	if err != nil {
+		logrus.Panicf("[newSnowflake] generator.initGenerator() err: %v", err)
+	}
 
 	return generator
 }

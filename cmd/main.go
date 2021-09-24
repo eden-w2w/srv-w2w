@@ -7,6 +7,10 @@ import (
 	"github.com/eden-w2w/srv-w2w/internal/modules/events"
 	"github.com/eden-w2w/srv-w2w/internal/modules/goods"
 	"github.com/eden-w2w/srv-w2w/internal/modules/order"
+	"github.com/eden-w2w/srv-w2w/internal/modules/payment_flow"
+	"github.com/eden-w2w/srv-w2w/internal/modules/promotion_flow"
+	"github.com/eden-w2w/srv-w2w/internal/modules/user"
+	"github.com/eden-w2w/srv-w2w/internal/modules/wechat"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -39,9 +43,13 @@ func main() {
 
 func runner(ctx *context.WaitStopContext) error {
 	logrus.SetLevel(global.Config.LogLevel)
-	internal.Generator = internal.NewSnowflake(global.Config.SnowflakeConfig)
+	internal.GetGenerator()
+	user.GetController()
+	wechat.GetController()
 	goods.GetController()
-	order.GetController().WithEventHandler(events.GetOrderEvent())
+	order.GetController().WithEventHandler(events.NewOrderEvent())
+	payment_flow.GetController()
+	promotion_flow.GetController()
 
 	go global.Config.GRPCServer.Serve(ctx, routers.Router)
 	return global.Config.HTTPServer.Serve(ctx, routers.Router)

@@ -13,4 +13,5 @@ require (
 	github.com/silenceper/wechat/v2 v2.0.9
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v0.0.5
+	github.com/wechatpay-apiv3/wechatpay-go v0.2.7 // indirect
 )

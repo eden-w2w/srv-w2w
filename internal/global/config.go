@@ -5,6 +5,7 @@ import (
 	"github.com/eden-framework/courier/transport_http"
 	"github.com/eden-framework/eden-framework/pkg/client/mysql"
 	"github.com/sirupsen/logrus"
+	"time"
 
 	"github.com/eden-w2w/srv-w2w/internal/databases"
 )
@@ -15,6 +16,25 @@ type SnowflakeConfig struct {
 	NodeCount  int64
 	NodeBits   uint8
 	StepBits   uint8
+}
+
+type Wechat struct {
+	// 小程序AppID
+	AppID string
+	// 小程序AppSecret
+	AppSecret string
+	// 微信商户ID
+	MerchantID string
+	// 微信商户证书序列号
+	MerchantCertSerialNo string
+	// 微信商户证书私钥
+	MerchantPK string
+	// 微信商户APIv3密钥
+	MerchantSecret string
+	// 微信支付商品描述
+	ProductionDesc string
+	// 微信支付回调地址
+	NotifyUrl string
 }
 
 var Config = struct {
@@ -31,8 +51,13 @@ var Config = struct {
 	// id generation
 	SnowflakeConfig
 
-	WechatAppID     string
-	WechatAppSecret string
+	// wechat config
+	Wechat
+
+	// 全局默认提成比例
+	GlobalProportion float64
+	// 支付流水默认超时时间
+	PaymentFlowExpireIn time.Duration
 }{
 	LogLevel: logrus.DebugLevel,
 
@@ -53,4 +78,6 @@ var Config = struct {
 		NodeBits:   10,
 		StepBits:   12,
 	},
+	GlobalProportion:    0.005,
+	PaymentFlowExpireIn: 30 * time.Minute,
 }

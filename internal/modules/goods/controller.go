@@ -15,7 +15,7 @@ var controller *Controller
 
 func GetController() *Controller {
 	if controller == nil {
-		controller = NewController(global.Config.MasterDB)
+		controller = newController(global.Config.MasterDB)
 	}
 	return controller
 }
@@ -26,11 +26,11 @@ type Controller struct {
 	managers map[uint64]sync.Mutex
 }
 
-func NewController(db sqlx.DBExecutor) *Controller {
+func newController(db sqlx.DBExecutor) *Controller {
 	goods := databases.Goods{}
 	goodsList, err := goods.List(db, nil)
 	if err != nil {
-		logrus.Panicf("goods.NewController goods.List(db, nil) err: %v", err)
+		logrus.Panicf("goods.newController goods.List(db, nil) err: %v", err)
 	}
 	managers := make(map[uint64]sync.Mutex)
 	for _, g := range goodsList {

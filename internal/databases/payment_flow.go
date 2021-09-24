@@ -1,6 +1,7 @@
 package databases
 
 import (
+	"github.com/eden-framework/sqlx"
 	"github.com/eden-framework/sqlx/datatypes"
 	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
 )
@@ -9,6 +10,8 @@ import (
 //go:generate eden generate tag PaymentFlow --defaults=true
 // @def primary ID
 // @def unique_index U_flow_id FlowID
+// @def index I_order_id OrderID UserID Status
+// @def index I_expire ExpiredAt
 type PaymentFlow struct {
 	datatypes.PrimaryID
 	// 流水ID
@@ -22,7 +25,22 @@ type PaymentFlow struct {
 	// 支付方式
 	PaymentMethod enums.PaymentMethod `json:"paymentMethod" db:"f_payment_method"`
 	// 支付系统流水号
-	RemoteFlowID string `json:"remoteFlowID" db:"f_remote_flow_id,size=255"`
-
+	RemoteFlowID string `json:"remoteFlowID" db:"f_remote_flow_id,size=255,default=''"`
+	// 支付状态
+	Status enums.PaymentStatus `json:"status" db:"f_status"`
+	// 超时时间
+	ExpiredAt datatypes.MySQLTimestamp `db:"f_expired_at,default='0'" json:"expiredAt"`
 	datatypes.OperateTime
+}
+
+func (m PaymentFlow) BatchFetchByOrderAndUserID(db sqlx.DBExecutor, orderID, userID uint64, status enums.PaymentStatus) ([]PaymentFlow, error) {
+	table := db.T(m)
+
+	condition := table.F(m.FieldKeyOrderID()).Eq(orderID)
+	condition = condition.And(table.F(m.FieldKeyUserID()).Eq(userID))
+	if status != enums.PAYMENT_STATUS_UNKNOWN {
+		condition = condition.And(table.F(m.FieldKeyStatus()).Eq(status))
+	}
+
+	return m.List(db, condition)
 }

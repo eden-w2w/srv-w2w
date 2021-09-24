@@ -4,6 +4,7 @@ import (
 	"github.com/eden-framework/sqlx"
 	"github.com/eden-framework/sqlx/builder"
 	"github.com/eden-w2w/srv-w2w/internal/global"
+	"github.com/eden-w2w/srv-w2w/internal/modules/payment_flow"
 	"github.com/sirupsen/logrus"
 
 	"github.com/eden-w2w/srv-w2w/internal"
@@ -16,7 +17,7 @@ var controller *Controller
 
 func GetController() *Controller {
 	if controller == nil {
-		controller = NewController(global.Config.MasterDB)
+		controller = newController(global.Config.MasterDB)
 	}
 	return controller
 }
@@ -26,7 +27,7 @@ type Controller struct {
 	eventHandler EventHandler
 }
 
-func NewController(db sqlx.DBExecutor) *Controller {
+func newController(db sqlx.DBExecutor) *Controller {
 	return &Controller{db: db}
 }
 
@@ -62,7 +63,7 @@ func (c Controller) CreateOrder(p CreateOrderParams, locker InventoryLock) (*dat
 	}
 
 	// 创建订单
-	id, _ := internal.Generator.GenerateUniqueID()
+	id, _ := internal.GetGenerator().GenerateUniqueID()
 	order := &databases.Order{
 		OrderID:       id,
 		UserID:        p.UserID,
@@ -203,7 +204,12 @@ func (c Controller) UpdateOrderStatusWithDB(db sqlx.DBExecutor, orderID uint64, 
 	// 执行状态变更事件
 	switch order.Status {
 	case enums.ORDER_STATUS__PAID:
-		err = c.eventHandler.OnOrderPaidEvent(db, order)
+		// 获取支付流水
+		flow, err := payment_flow.GetController().GetFlowByOrderAndUserID(order.OrderID, order.UserID, db)
+		if err != nil {
+			return err
+		}
+		err = c.eventHandler.OnOrderPaidEvent(db, order, flow)
 	case enums.ORDER_STATUS__COMPLETE:
 		err = c.eventHandler.OnOrderCompleteEvent(db, order)
 	}

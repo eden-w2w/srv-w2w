@@ -1,43 +1,79 @@
 package wechat
 
 import (
+	"context"
+	"fmt"
 	"github.com/eden-w2w/srv-w2w/internal/contants/errors"
+	"github.com/eden-w2w/srv-w2w/internal/databases"
 	"github.com/eden-w2w/srv-w2w/internal/global"
 	w "github.com/silenceper/wechat/v2"
 	"github.com/silenceper/wechat/v2/cache"
 	"github.com/silenceper/wechat/v2/miniprogram"
 	"github.com/silenceper/wechat/v2/miniprogram/auth"
-	"github.com/silenceper/wechat/v2/miniprogram/config"
+	programConfig "github.com/silenceper/wechat/v2/miniprogram/config"
 	"github.com/silenceper/wechat/v2/miniprogram/qrcode"
 	"github.com/sirupsen/logrus"
+	"github.com/wechatpay-apiv3/wechatpay-go/core"
+	"github.com/wechatpay-apiv3/wechatpay-go/core/option"
+	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/jsapi"
+	"github.com/wechatpay-apiv3/wechatpay-go/utils"
+	"time"
 )
 
 var controller *Controller
 
 func GetController() *Controller {
 	if controller == nil {
-		controller = NewController(w.NewWechat(), global.Config.WechatAppID, global.Config.WechatAppSecret)
+		controller = newController(w.NewWechat(), global.Config.Wechat)
 	}
 	return controller
 }
 
 type Controller struct {
-	wc      *w.Wechat
-	program *miniprogram.MiniProgram
+	wc        *w.Wechat
+	program   *miniprogram.MiniProgram
+	payClient *core.Client
+
+	appID           string
+	merchantID      string
+	defaultProdDesc string
+	notifyUrl       string
 }
 
-func NewController(wc *w.Wechat, appID, appSecret string) *Controller {
+func newController(wc *w.Wechat, wechatConfig global.Wechat) *Controller {
 	memory := cache.NewMemory()
-	cfg := &config.Config{
-		AppID:     appID,
-		AppSecret: appSecret,
+	program := wc.GetMiniProgram(&programConfig.Config{
+		AppID:     wechatConfig.AppID,
+		AppSecret: wechatConfig.AppSecret,
 		Cache:     memory,
+	})
+
+	mchPK, err := utils.LoadPrivateKey(wechatConfig.MerchantPK)
+	if err != nil {
+		logrus.Panicf("[wechat.newController] utils.LoadPrivateKey err: %v", err)
 	}
-	program := wc.GetMiniProgram(cfg)
+	ctx := context.Background()
+	opts := []core.ClientOption{
+		option.WithWechatPayAutoAuthCipher(
+			wechatConfig.MerchantID,
+			wechatConfig.MerchantCertSerialNo,
+			mchPK,
+			wechatConfig.MerchantSecret),
+	}
+	client, err := core.NewClient(ctx, opts...)
+	if err != nil {
+		logrus.Panicf("[wechat.newController] core.NewClient err: %v", err)
+	}
 
 	return &Controller{
-		wc:      wc,
-		program: program,
+		wc:        wc,
+		program:   program,
+		payClient: client,
+
+		appID:           wechatConfig.AppID,
+		merchantID:      wechatConfig.MerchantID,
+		defaultProdDesc: wechatConfig.ProductionDesc,
+		notifyUrl:       wechatConfig.NotifyUrl,
 	}
 }
 
@@ -57,5 +93,39 @@ func (c Controller) GetUnlimitedQrCode(params qrcode.QRCoder) (buffer []byte, er
 		return nil, errors.BadGateway
 	}
 
+	return
+}
+
+func (c Controller) CreatePrePayment(ctx context.Context, order *databases.Order, flow *databases.PaymentFlow, payer *databases.User) (resp *jsapi.PrepayWithRequestPaymentResponse, err error) {
+	service := jsapi.JsapiApiService{
+		Client: c.payClient,
+	}
+	request := jsapi.PrepayRequest{
+		Appid:         core.String(c.appID),
+		Mchid:         core.String(c.merchantID),
+		Description:   core.String(c.defaultProdDesc),
+		OutTradeNo:    core.String(fmt.Sprintf("%d", flow.FlowID)),
+		TimeExpire:    core.Time(time.Time(flow.ExpiredAt)),
+		Attach:        nil,
+		NotifyUrl:     core.String(c.notifyUrl),
+		GoodsTag:      nil,
+		LimitPay:      nil,
+		SupportFapiao: nil,
+		Amount: &jsapi.Amount{
+			Total:    core.Int64(int64(flow.Amount)),
+			Currency: nil,
+		},
+		Payer: &jsapi.Payer{
+			Openid: core.String(payer.OpenID),
+		},
+		Detail:     nil,
+		SceneInfo:  nil,
+		SettleInfo: nil,
+	}
+	resp, _, err = service.PrepayWithRequestPayment(ctx, request)
+	if err != nil {
+		logrus.Errorf("[CreatePrePayment] service.PrepayWithRequestPayment err: %v, request: %+v", err, request)
+		return nil, errors.BadGateway
+	}
 	return
 }

@@ -14,9 +14,12 @@ import (
 	"time"
 )
 
-var controller = NewController(global.Config.MasterDB)
+var controller *Controller
 
 func GetController() *Controller {
+	if controller == nil {
+		controller = newController(global.Config.MasterDB)
+	}
 	return controller
 }
 
@@ -24,12 +27,12 @@ type Controller struct {
 	db sqlx.DBExecutor
 }
 
-func NewController(db sqlx.DBExecutor) *Controller {
+func newController(db sqlx.DBExecutor) *Controller {
 	return &Controller{db: db}
 }
 
 func (c Controller) CreateUserByWechatSession(params CreateUserByWechatSessionParams) (*databases.User, error) {
-	id, _ := internal.Generator.GenerateUniqueID()
+	id, _ := internal.GetGenerator().GenerateUniqueID()
 	model := &databases.User{
 		UserID:      id,
 		Token:       c.generateToken(id),
@@ -99,6 +102,28 @@ func (c Controller) generateToken(userID uint64) string {
 	sha256.Write([]byte(id + t))
 	hash := sha256.Sum(nil)
 	return hex.EncodeToString(hash)
+}
+
+func (c Controller) GetUserByUserID(userID uint64, db sqlx.DBExecutor, forUpdate bool) (model *databases.User, err error) {
+	if db == nil {
+		db = c.db
+	}
+	model = &databases.User{
+		UserID: userID,
+	}
+	if forUpdate {
+		err = model.FetchByUserIDForUpdate(db)
+	} else {
+		err = model.FetchByUserID(db)
+	}
+	if err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, errors.UserNotFound
+		}
+		logrus.Errorf("[GetUserByUserID] model.FetchByUserID err: %v, userID: %d", err, userID)
+		return nil, errors.InternalError
+	}
+	return model, nil
 }
 
 func (c Controller) GetUserByOpenID(openID string) (*databases.User, error) {

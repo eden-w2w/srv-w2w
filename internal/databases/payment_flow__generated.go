@@ -7,11 +7,25 @@ import (
 	github_com_eden_framework_sqlx "github.com/eden-framework/sqlx"
 	github_com_eden_framework_sqlx_builder "github.com/eden-framework/sqlx/builder"
 	github_com_eden_framework_sqlx_datatypes "github.com/eden-framework/sqlx/datatypes"
+	github_com_eden_w2_w_srv_w2_w_internal_contants_enums "github.com/eden-w2w/srv-w2w/internal/contants/enums"
 )
 
 func (PaymentFlow) PrimaryKey() []string {
 	return []string{
 		"ID",
+	}
+}
+
+func (PaymentFlow) Indexes() github_com_eden_framework_sqlx_builder.Indexes {
+	return github_com_eden_framework_sqlx_builder.Indexes{
+		"I_expire": []string{
+			"ExpiredAt",
+		},
+		"I_order_id": []string{
+			"OrderID",
+			"UserID",
+			"Status",
+		},
 	}
 }
 
@@ -31,10 +45,12 @@ func (PaymentFlow) UniqueIndexes() github_com_eden_framework_sqlx_builder.Indexe
 func (PaymentFlow) Comments() map[string]string {
 	return map[string]string{
 		"Amount":        "支付金额",
+		"ExpiredAt":     "超时时间",
 		"FlowID":        "流水ID",
 		"OrderID":       "关联订单号",
 		"PaymentMethod": "支付方式",
 		"RemoteFlowID":  "支付系统流水号",
+		"Status":        "支付状态",
 		"UserID":        "用户ID",
 	}
 }
@@ -65,6 +81,9 @@ func (PaymentFlow) ColDescriptions() map[string][]string {
 		"Amount": []string{
 			"支付金额",
 		},
+		"ExpiredAt": []string{
+			"超时时间",
+		},
 		"FlowID": []string{
 			"流水ID",
 		},
@@ -76,6 +95,9 @@ func (PaymentFlow) ColDescriptions() map[string][]string {
 		},
 		"RemoteFlowID": []string{
 			"支付系统流水号",
+		},
+		"Status": []string{
+			"支付状态",
 		},
 		"UserID": []string{
 			"用户ID",
@@ -139,6 +161,22 @@ func (m *PaymentFlow) FieldRemoteFlowID() *github_com_eden_framework_sqlx_builde
 	return PaymentFlowTable.F(m.FieldKeyRemoteFlowID())
 }
 
+func (PaymentFlow) FieldKeyStatus() string {
+	return "Status"
+}
+
+func (m *PaymentFlow) FieldStatus() *github_com_eden_framework_sqlx_builder.Column {
+	return PaymentFlowTable.F(m.FieldKeyStatus())
+}
+
+func (PaymentFlow) FieldKeyExpiredAt() string {
+	return "ExpiredAt"
+}
+
+func (m *PaymentFlow) FieldExpiredAt() *github_com_eden_framework_sqlx_builder.Column {
+	return PaymentFlowTable.F(m.FieldKeyExpiredAt())
+}
+
 func (PaymentFlow) FieldKeyCreatedAt() string {
 	return "CreatedAt"
 }
@@ -169,8 +207,12 @@ func (PaymentFlow) ColRelations() map[string][]string {
 
 func (m *PaymentFlow) IndexFieldNames() []string {
 	return []string{
+		"ExpiredAt",
 		"FlowID",
 		"ID",
+		"OrderID",
+		"Status",
+		"UserID",
 	}
 }
 
@@ -612,6 +654,20 @@ func (m *PaymentFlow) Count(db github_com_eden_framework_sqlx.DBExecutor, condit
 
 }
 
+func (m *PaymentFlow) BatchFetchByExpiredAtList(db github_com_eden_framework_sqlx.DBExecutor, values []github_com_eden_framework_sqlx_datatypes.Timestamp) ([]PaymentFlow, error) {
+
+	if len(values) == 0 {
+		return nil, nil
+	}
+
+	table := db.T(m)
+
+	condition := table.F("ExpiredAt").In(values)
+
+	return m.List(db, condition)
+
+}
+
 func (m *PaymentFlow) BatchFetchByFlowIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]PaymentFlow, error) {
 
 	if len(values) == 0 {
@@ -635,6 +691,48 @@ func (m *PaymentFlow) BatchFetchByIDList(db github_com_eden_framework_sqlx.DBExe
 	table := db.T(m)
 
 	condition := table.F("ID").In(values)
+
+	return m.List(db, condition)
+
+}
+
+func (m *PaymentFlow) BatchFetchByOrderIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]PaymentFlow, error) {
+
+	if len(values) == 0 {
+		return nil, nil
+	}
+
+	table := db.T(m)
+
+	condition := table.F("OrderID").In(values)
+
+	return m.List(db, condition)
+
+}
+
+func (m *PaymentFlow) BatchFetchByStatusList(db github_com_eden_framework_sqlx.DBExecutor, values []github_com_eden_w2_w_srv_w2_w_internal_contants_enums.PaymentStatus) ([]PaymentFlow, error) {
+
+	if len(values) == 0 {
+		return nil, nil
+	}
+
+	table := db.T(m)
+
+	condition := table.F("Status").In(values)
+
+	return m.List(db, condition)
+
+}
+
+func (m *PaymentFlow) BatchFetchByUserIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]PaymentFlow, error) {
+
+	if len(values) == 0 {
+		return nil, nil
+	}
+
+	table := db.T(m)
+
+	condition := table.F("UserID").In(values)
 
 	return m.List(db, condition)
 
