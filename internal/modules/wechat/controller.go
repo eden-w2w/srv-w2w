@@ -48,21 +48,24 @@ func newController(wc *w.Wechat, wechatConfig global.Wechat) *Controller {
 		Cache:     memory,
 	})
 
-	mchPK, err := utils.LoadPrivateKey(wechatConfig.MerchantPK)
-	if err != nil {
-		logrus.Panicf("[wechat.newController] utils.LoadPrivateKey err: %v", err)
-	}
-	ctx := context.Background()
-	opts := []core.ClientOption{
-		option.WithWechatPayAutoAuthCipher(
-			wechatConfig.MerchantID,
-			wechatConfig.MerchantCertSerialNo,
-			mchPK,
-			wechatConfig.MerchantSecret),
-	}
-	client, err := core.NewClient(ctx, opts...)
-	if err != nil {
-		logrus.Panicf("[wechat.newController] core.NewClient err: %v", err)
+	var client *core.Client
+	if global.Config.EnableWechatPay {
+		mchPK, err := utils.LoadPrivateKey(wechatConfig.MerchantPK)
+		if err != nil {
+			logrus.Panicf("[wechat.newController] utils.LoadPrivateKey err: %v", err)
+		}
+		ctx := context.Background()
+		opts := []core.ClientOption{
+			option.WithWechatPayAutoAuthCipher(
+				wechatConfig.MerchantID,
+				wechatConfig.MerchantCertSerialNo,
+				mchPK,
+				wechatConfig.MerchantSecret),
+		}
+		client, err = core.NewClient(ctx, opts...)
+		if err != nil {
+			logrus.Panicf("[wechat.newController] core.NewClient err: %v", err)
+		}
 	}
 
 	return &Controller{
@@ -97,6 +100,9 @@ func (c Controller) GetUnlimitedQrCode(params qrcode.QRCoder) (buffer []byte, er
 }
 
 func (c Controller) CreatePrePayment(ctx context.Context, order *databases.Order, flow *databases.PaymentFlow, payer *databases.User) (resp *jsapi.PrepayWithRequestPaymentResponse, err error) {
+	if c.payClient == nil {
+		return
+	}
 	service := jsapi.JsapiApiService{
 		Client: c.payClient,
 	}

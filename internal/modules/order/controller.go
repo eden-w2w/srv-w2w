@@ -4,10 +4,10 @@ import (
 	"github.com/eden-framework/sqlx"
 	"github.com/eden-framework/sqlx/builder"
 	"github.com/eden-w2w/srv-w2w/internal/global"
+	"github.com/eden-w2w/srv-w2w/internal/modules/id_generator"
 	"github.com/eden-w2w/srv-w2w/internal/modules/payment_flow"
 	"github.com/sirupsen/logrus"
 
-	"github.com/eden-w2w/srv-w2w/internal"
 	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
 	"github.com/eden-w2w/srv-w2w/internal/contants/errors"
 	"github.com/eden-w2w/srv-w2w/internal/databases"
@@ -63,7 +63,7 @@ func (c Controller) CreateOrder(p CreateOrderParams, locker InventoryLock) (*dat
 	}
 
 	// 创建订单
-	id, _ := internal.GetGenerator().GenerateUniqueID()
+	id, _ := id_generator.GetGenerator().GenerateUniqueID()
 	order := &databases.Order{
 		OrderID:       id,
 		UserID:        p.UserID,

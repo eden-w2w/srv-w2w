@@ -10,6 +10,7 @@ import (
 // @def unique_index U_flow_id FlowID
 // @def index I_user_id UserID
 // @def index I_payment_flow_id PaymentFlowID
+// @def index I_statement_id StatementID
 type PromotionFlow struct {
 	datatypes.PrimaryID
 	// 流水ID
@@ -27,7 +28,9 @@ type PromotionFlow struct {
 	// 奖励比例
 	Proportion float64 `json:"proportion" db:"f_proportion"`
 	// 关联的支付流水
-	PaymentFlowID uint64 `json:"paymentFlowID" db:"f_payment_flow_id,default='0'"`
+	PaymentFlowID uint64 `json:"paymentFlowID,string" db:"f_payment_flow_id,default='0'"`
+	// 关联的结算单
+	StatementID uint64 `json:"statementID,string" db:"f_statement_id"`
 
 	datatypes.OperateTime
 }

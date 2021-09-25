@@ -20,6 +20,9 @@ func (PromotionFlow) Indexes() github_com_eden_framework_sqlx_builder.Indexes {
 		"I_payment_flow_id": []string{
 			"PaymentFlowID",
 		},
+		"I_statement_id": []string{
+			"StatementID",
+		},
 		"I_user_id": []string{
 			"UserID",
 		},
@@ -47,6 +50,7 @@ func (PromotionFlow) Comments() map[string]string {
 		"Proportion":      "奖励比例",
 		"RefererID":       "奖励来源用户ID",
 		"RefererNickName": "奖励来源的用户昵称",
+		"StatementID":     "关联的结算单",
 		"UserID":          "获得奖励的用户ID",
 		"UserNickName":    "获得奖励的用户昵称",
 	}
@@ -92,6 +96,9 @@ func (PromotionFlow) ColDescriptions() map[string][]string {
 		},
 		"RefererNickName": []string{
 			"奖励来源的用户昵称",
+		},
+		"StatementID": []string{
+			"关联的结算单",
 		},
 		"UserID": []string{
 			"获得奖励的用户ID",
@@ -174,6 +181,14 @@ func (m *PromotionFlow) FieldPaymentFlowID() *github_com_eden_framework_sqlx_bui
 	return PromotionFlowTable.F(m.FieldKeyPaymentFlowID())
 }
 
+func (PromotionFlow) FieldKeyStatementID() string {
+	return "StatementID"
+}
+
+func (m *PromotionFlow) FieldStatementID() *github_com_eden_framework_sqlx_builder.Column {
+	return PromotionFlowTable.F(m.FieldKeyStatementID())
+}
+
 func (PromotionFlow) FieldKeyCreatedAt() string {
 	return "CreatedAt"
 }
@@ -207,6 +222,7 @@ func (m *PromotionFlow) IndexFieldNames() []string {
 		"FlowID",
 		"ID",
 		"PaymentFlowID",
+		"StatementID",
 		"UserID",
 	}
 }
@@ -686,6 +702,20 @@ func (m *PromotionFlow) BatchFetchByPaymentFlowIDList(db github_com_eden_framewo
 	table := db.T(m)
 
 	condition := table.F("PaymentFlowID").In(values)
+
+	return m.List(db, condition)
+
+}
+
+func (m *PromotionFlow) BatchFetchByStatementIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]PromotionFlow, error) {
+
+	if len(values) == 0 {
+		return nil, nil
+	}
+
+	table := db.T(m)
+
+	condition := table.F("StatementID").In(values)
 
 	return m.List(db, condition)
 

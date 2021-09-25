@@ -3,11 +3,11 @@ package payment_flow
 import (
 	"github.com/eden-framework/sqlx"
 	"github.com/eden-framework/sqlx/datatypes"
-	"github.com/eden-w2w/srv-w2w/internal"
 	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
 	"github.com/eden-w2w/srv-w2w/internal/contants/errors"
 	"github.com/eden-w2w/srv-w2w/internal/databases"
 	"github.com/eden-w2w/srv-w2w/internal/global"
+	"github.com/eden-w2w/srv-w2w/internal/modules/id_generator"
 	"github.com/sirupsen/logrus"
 	"time"
 )
@@ -35,7 +35,7 @@ func (c Controller) CreatePaymentFlow(params CreatePaymentFlowParams, db sqlx.DB
 	if db == nil {
 		db = c.db
 	}
-	id, _ := internal.GetGenerator().GenerateUniqueID()
+	id, _ := id_generator.GetGenerator().GenerateUniqueID()
 	model := &databases.PaymentFlow{
 		FlowID:        id,
 		UserID:        params.UserID,

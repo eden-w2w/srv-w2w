@@ -5,10 +5,10 @@ import (
 	"encoding/hex"
 	"github.com/eden-framework/sqlx"
 	"github.com/eden-framework/sqlx/datatypes"
-	"github.com/eden-w2w/srv-w2w/internal"
 	"github.com/eden-w2w/srv-w2w/internal/contants/errors"
 	"github.com/eden-w2w/srv-w2w/internal/databases"
 	"github.com/eden-w2w/srv-w2w/internal/global"
+	"github.com/eden-w2w/srv-w2w/internal/modules/id_generator"
 	"github.com/sirupsen/logrus"
 	"strconv"
 	"time"
@@ -32,7 +32,7 @@ func newController(db sqlx.DBExecutor) *Controller {
 }
 
 func (c Controller) CreateUserByWechatSession(params CreateUserByWechatSessionParams) (*databases.User, error) {
-	id, _ := internal.GetGenerator().GenerateUniqueID()
+	id, _ := id_generator.GetGenerator().GenerateUniqueID()
 	model := &databases.User{
 		UserID:      id,
 		Token:       c.generateToken(id),

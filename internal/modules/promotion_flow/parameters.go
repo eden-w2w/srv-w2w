@@ -15,4 +15,6 @@ type CreatePromotionFlowParams struct {
 	Proportion float64 `json:"proportion"`
 	// 关联的支付流水
 	PaymentFlowID uint64 `json:"paymentFlowID"`
+	// 关联的结算单
+	StatementID uint64 `json:"statementID,string"`
 }

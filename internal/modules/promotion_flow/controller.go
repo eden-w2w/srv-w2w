@@ -2,10 +2,10 @@ package promotion_flow
 
 import (
 	"github.com/eden-framework/sqlx"
-	"github.com/eden-w2w/srv-w2w/internal"
 	"github.com/eden-w2w/srv-w2w/internal/contants/errors"
 	"github.com/eden-w2w/srv-w2w/internal/databases"
 	"github.com/eden-w2w/srv-w2w/internal/global"
+	"github.com/eden-w2w/srv-w2w/internal/modules/id_generator"
 	"github.com/sirupsen/logrus"
 )
 
@@ -38,7 +38,7 @@ func (c Controller) CreatePromotionFlow(params CreatePromotionFlowParams, db sql
 	if db == nil {
 		db = c.db
 	}
-	id, _ := internal.GetGenerator().GenerateUniqueID()
+	id, _ := id_generator.GetGenerator().GenerateUniqueID()
 	model := &databases.PromotionFlow{
 		FlowID:          id,
 		UserID:          params.UserID,
@@ -48,6 +48,7 @@ func (c Controller) CreatePromotionFlow(params CreatePromotionFlowParams, db sql
 		Amount:          params.Amount,
 		Proportion:      params.Proportion,
 		PaymentFlowID:   params.PaymentFlowID,
+		StatementID:     params.StatementID,
 	}
 	err := model.Create(db)
 	if err != nil {

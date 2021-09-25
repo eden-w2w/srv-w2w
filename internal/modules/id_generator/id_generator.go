@@ -1,4 +1,4 @@
-package internal
+package id_generator
 
 import (
 	"errors"
