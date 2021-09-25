@@ -11,4 +11,5 @@ const (
 	PAYMENT_STATUS__PROCESS               // 处理中
 	PAYMENT_STATUS__SUCCESS               // 支付成功
 	PAYMENT_STATUS__FAIL                  // 支付失败
+	PAYMENT_STATUS__CLOSED                // 已关闭
 )

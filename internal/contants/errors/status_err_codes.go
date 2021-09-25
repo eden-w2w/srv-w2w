@@ -33,6 +33,8 @@ const (
 const (
 	// @errTalk 操作冲突
 	Conflict status_error.StatusErrorCode = http.StatusConflict*1e6 + ServiceStatusErrorCode + iota
+	// @errTalk 支付金额与交易单金额不一致
+	FlowAmountIncorrect
 )
 
 const (

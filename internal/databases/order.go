@@ -10,6 +10,7 @@ import (
 // @def primary ID
 // @def unique_index U_order_id OrderID
 // @def index I_index UserID Status
+// @def index I_expire ExpiredAt
 type Order struct {
 	datatypes.PrimaryID
 	// 业务ID
@@ -32,6 +33,7 @@ type Order struct {
 	Mobile string `json:"mobile" db:"f_mobile"`
 	// 订单状态
 	Status enums.OrderStatus `json:"status" db:"f_status"`
-
+	// 过期时间
+	ExpiredAt datatypes.MySQLTimestamp `db:"f_expired_at" json:"expiredAt"`
 	datatypes.OperateTime
 }

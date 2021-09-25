@@ -30,6 +30,8 @@ type PaymentFlow struct {
 	Status enums.PaymentStatus `json:"status" db:"f_status"`
 	// 超时时间
 	ExpiredAt datatypes.MySQLTimestamp `db:"f_expired_at,default='0'" json:"expiredAt"`
+	// 支付系统回调原始报文
+	RemoteData string `json:"-" db:"f_remote_data,size=65535,default=''"`
 	datatypes.OperateTime
 }
 

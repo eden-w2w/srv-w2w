@@ -67,6 +67,10 @@ func (req CreatePaymentFlow) Output(ctx context.Context) (result interface{}, er
 		return nil
 	})
 
+	tx = tx.With(func(db sqlx.DBExecutor) error {
+		return payment_flow.GetController().UpdatePaymentFlowRemoteID(paymentFlow.FlowID, *wechatResp.PrepayId, db)
+	})
+
 	err = tx.Do()
 	if err != nil {
 		logrus.Errorf("[CreatePaymentFlow] tx.Do() err: %v, params: %+v", err, req.Data)

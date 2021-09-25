@@ -14,9 +14,14 @@ import (
 	"github.com/silenceper/wechat/v2/miniprogram/qrcode"
 	"github.com/sirupsen/logrus"
 	"github.com/wechatpay-apiv3/wechatpay-go/core"
+	"github.com/wechatpay-apiv3/wechatpay-go/core/auth/verifiers"
+	"github.com/wechatpay-apiv3/wechatpay-go/core/downloader"
+	"github.com/wechatpay-apiv3/wechatpay-go/core/notify"
 	"github.com/wechatpay-apiv3/wechatpay-go/core/option"
+	"github.com/wechatpay-apiv3/wechatpay-go/services/payments"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/jsapi"
 	"github.com/wechatpay-apiv3/wechatpay-go/utils"
+	"net/http"
 	"time"
 )
 
@@ -34,10 +39,11 @@ type Controller struct {
 	program   *miniprogram.MiniProgram
 	payClient *core.Client
 
-	appID           string
-	merchantID      string
-	defaultProdDesc string
-	notifyUrl       string
+	appID             string
+	merchantID        string
+	merchantKeySecret string
+	defaultProdDesc   string
+	notifyUrl         string
 }
 
 func newController(wc *w.Wechat, wechatConfig global.Wechat) *Controller {
@@ -73,10 +79,11 @@ func newController(wc *w.Wechat, wechatConfig global.Wechat) *Controller {
 		program:   program,
 		payClient: client,
 
-		appID:           wechatConfig.AppID,
-		merchantID:      wechatConfig.MerchantID,
-		defaultProdDesc: wechatConfig.ProductionDesc,
-		notifyUrl:       wechatConfig.NotifyUrl,
+		appID:             wechatConfig.AppID,
+		merchantID:        wechatConfig.MerchantID,
+		merchantKeySecret: wechatConfig.MerchantSecret,
+		defaultProdDesc:   wechatConfig.ProductionDesc,
+		notifyUrl:         wechatConfig.NotifyUrl,
 	}
 }
 
@@ -134,4 +141,18 @@ func (c Controller) CreatePrePayment(ctx context.Context, order *databases.Order
 		return nil, errors.BadGateway
 	}
 	return
+}
+
+func (c Controller) ParseWechatPaymentNotify(ctx context.Context, request *http.Request) (*notify.Request, *payments.Transaction, error) {
+	certVisitor := downloader.MgrInstance().GetCertificateVisitor(c.merchantID)
+	handler := notify.NewNotifyHandler(c.merchantKeySecret, verifiers.NewSHA256WithRSAVerifier(certVisitor))
+
+	transaction := new(payments.Transaction)
+	notifyReq, err := handler.ParseNotifyRequest(ctx, request, transaction)
+	if err != nil {
+		logrus.Errorf("[ParseWechatPaymentNotify] handler.ParseNotifyRequest err: %v", err)
+		return nil, nil, errors.InternalError
+	}
+
+	return notifyReq, transaction, nil
 }

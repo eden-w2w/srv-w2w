@@ -18,6 +18,9 @@ func (Order) PrimaryKey() []string {
 
 func (Order) Indexes() github_com_eden_framework_sqlx_builder.Indexes {
 	return github_com_eden_framework_sqlx_builder.Indexes{
+		"I_expire": []string{
+			"ExpiredAt",
+		},
 		"I_index": []string{
 			"UserID",
 			"Status",
@@ -40,10 +43,12 @@ func (Order) UniqueIndexes() github_com_eden_framework_sqlx_builder.Indexes {
 
 func (Order) Comments() map[string]string {
 	return map[string]string{
+		"ExpiredAt":     "过期时间",
 		"Mobile":        "联系电话",
 		"OrderID":       "业务ID",
 		"PaymentMethod": "支付方式",
 		"Recipients":    "收件人",
+		"RefererID":     "推荐人ID",
 		"Remark":        "备注",
 		"ShippingAddr":  "收货地址",
 		"Status":        "订单状态",
@@ -75,6 +80,9 @@ func (Order) TableName() string {
 
 func (Order) ColDescriptions() map[string][]string {
 	return map[string][]string{
+		"ExpiredAt": []string{
+			"过期时间",
+		},
 		"Mobile": []string{
 			"联系电话",
 		},
@@ -86,6 +94,9 @@ func (Order) ColDescriptions() map[string][]string {
 		},
 		"Recipients": []string{
 			"收件人",
+		},
+		"RefererID": []string{
+			"推荐人ID",
 		},
 		"Remark": []string{
 			"备注",
@@ -127,6 +138,14 @@ func (Order) FieldKeyUserID() string {
 
 func (m *Order) FieldUserID() *github_com_eden_framework_sqlx_builder.Column {
 	return OrderTable.F(m.FieldKeyUserID())
+}
+
+func (Order) FieldKeyRefererID() string {
+	return "RefererID"
+}
+
+func (m *Order) FieldRefererID() *github_com_eden_framework_sqlx_builder.Column {
+	return OrderTable.F(m.FieldKeyRefererID())
 }
 
 func (Order) FieldKeyTotalPrice() string {
@@ -185,6 +204,14 @@ func (m *Order) FieldStatus() *github_com_eden_framework_sqlx_builder.Column {
 	return OrderTable.F(m.FieldKeyStatus())
 }
 
+func (Order) FieldKeyExpiredAt() string {
+	return "ExpiredAt"
+}
+
+func (m *Order) FieldExpiredAt() *github_com_eden_framework_sqlx_builder.Column {
+	return OrderTable.F(m.FieldKeyExpiredAt())
+}
+
 func (Order) FieldKeyCreatedAt() string {
 	return "CreatedAt"
 }
@@ -215,6 +242,7 @@ func (Order) ColRelations() map[string][]string {
 
 func (m *Order) IndexFieldNames() []string {
 	return []string{
+		"ExpiredAt",
 		"ID",
 		"OrderID",
 		"Status",
@@ -657,6 +685,20 @@ func (m *Order) Count(db github_com_eden_framework_sqlx.DBExecutor, condition gi
 	)
 
 	return count, err
+
+}
+
+func (m *Order) BatchFetchByExpiredAtList(db github_com_eden_framework_sqlx.DBExecutor, values []github_com_eden_framework_sqlx_datatypes.Timestamp) ([]Order, error) {
+
+	if len(values) == 0 {
+		return nil, nil
+	}
+
+	table := db.T(m)
+
+	condition := table.F("ExpiredAt").In(values)
+
+	return m.List(db, condition)
 
 }
 

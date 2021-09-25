@@ -2,6 +2,7 @@ package payment_flow
 
 import (
 	"github.com/eden-framework/sqlx"
+	"github.com/eden-framework/sqlx/builder"
 	"github.com/eden-framework/sqlx/datatypes"
 	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
 	"github.com/eden-w2w/srv-w2w/internal/contants/errors"
@@ -9,6 +10,7 @@ import (
 	"github.com/eden-w2w/srv-w2w/internal/global"
 	"github.com/eden-w2w/srv-w2w/internal/modules/id_generator"
 	"github.com/sirupsen/logrus"
+	"github.com/wechatpay-apiv3/wechatpay-go/services/payments"
 	"time"
 )
 
@@ -29,6 +31,25 @@ func GetController() *Controller {
 		controller = newController(global.Config.MasterDB)
 	}
 	return controller
+}
+
+func (c Controller) GetPaymentFlowByID(flowID uint64, db sqlx.DBExecutor, forUpdate bool) (model *databases.PaymentFlow, err error) {
+	if db == nil {
+		db = c.db
+	}
+	model = &databases.PaymentFlow{FlowID: flowID}
+	if forUpdate {
+		err = model.FetchByFlowIDForUpdate(db)
+	} else {
+		err = model.FetchByFlowID(db)
+	}
+	if err != nil {
+		if sqlx.DBErr(err).IsNotFound() {
+			return nil, errors.PaymentFlowNotFound
+		}
+		logrus.Errorf("[GetPaymentFlowByID] err: %v, flowID: %d", err, flowID)
+	}
+	return
 }
 
 func (c Controller) CreatePaymentFlow(params CreatePaymentFlowParams, db sqlx.DBExecutor) (*databases.PaymentFlow, error) {
@@ -71,4 +92,46 @@ func (c Controller) GetFlowByOrderAndUserID(orderID, userID uint64, db sqlx.DBEx
 	}
 
 	return &models[0], nil
+}
+
+func (c Controller) UpdatePaymentFlowRemoteID(flowID uint64, prepayID string, db sqlx.DBExecutor) error {
+	if db == nil {
+		db = c.db
+	}
+	model := &databases.PaymentFlow{FlowID: flowID}
+	fields := builder.FieldValues{
+		"RemoteFlowID": prepayID,
+	}
+	err := model.UpdateByFlowIDWithMap(db, fields)
+	if err != nil {
+		logrus.Errorf("[UpdatePaymentFlowRemoteID] model.UpdateByFlowIDWithMap err: %v, flowID: %d, remoteID: %s", err, flowID, prepayID)
+		return errors.InternalError
+	}
+	return nil
+}
+
+func (c Controller) UpdatePaymentFlowStatus(flowID uint64, status enums.PaymentStatus, trans *payments.Transaction, db sqlx.DBExecutor) error {
+	if trans == nil {
+		logrus.Errorf("[UpdatePaymentFlowSuccess] trans == nil")
+		return errors.InternalError
+	}
+	if db == nil {
+		db = c.db
+	}
+	model := &databases.PaymentFlow{FlowID: flowID}
+	transJson, err := trans.MarshalJSON()
+	if err != nil {
+		logrus.Errorf("[UpdatePaymentFlowSuccess] trans.MarshalJSON() err: %v, flowID: %d, status: %s", err, flowID, status.String())
+		return errors.InternalError
+	}
+	fields := builder.FieldValues{
+		"RemoteData": string(transJson),
+		"Status":     status,
+	}
+	err = model.UpdateByFlowIDWithMap(db, fields)
+	if err != nil {
+		logrus.Errorf("[UpdatePaymentFlowSuccess] model.UpdateByFlowIDWithMap err: %v, flowID: %d, status: %s", err, flowID, status.String())
+		return errors.InternalError
+	}
+	return nil
 }
