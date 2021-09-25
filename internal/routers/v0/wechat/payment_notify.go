@@ -18,19 +18,19 @@ import (
 )
 
 func init() {
-	Router.Register(courier.NewRouter(Notify{}))
+	Router.Register(courier.NewRouter(PaymentNotify{}))
 }
 
-// Notify 微信支付回调
-type Notify struct {
+// PaymentNotify 微信支付回调
+type PaymentNotify struct {
 	httpx.MethodPost
 }
 
-func (req Notify) Path() string {
-	return "/notify"
+func (req PaymentNotify) Path() string {
+	return "/payment_notify"
 }
 
-func (req Notify) Output(ctx context.Context) (result interface{}, err error) {
+func (req PaymentNotify) Output(ctx context.Context) (result interface{}, err error) {
 	request := transport_http.GetRequest(ctx)
 	_, trans, err := wechat.GetController().ParseWechatPaymentNotify(ctx, request)
 	if err != nil {
@@ -38,16 +38,16 @@ func (req Notify) Output(ctx context.Context) (result interface{}, err error) {
 	}
 	tradeState, err := enums.ParseWechatTradeStateFromString(*trans.TradeState)
 	if err != nil {
-		logrus.Errorf("[Notify] enums.ParseWechatTradeStateFromString err: %v, TradeState: %s", err, *trans.TradeState)
+		logrus.Errorf("[PaymentNotify] enums.ParseWechatTradeStateFromString err: %v, TradeState: %s", err, *trans.TradeState)
 		return nil, errors.InternalError
 	}
 	if !tradeState.IsEnding() {
-		logrus.Infof("[Notify] !tradeState.IsEnding(), state: %s", tradeState.String())
+		logrus.Infof("[PaymentNotify] !tradeState.IsEnding(), state: %s", tradeState.String())
 		return nil, nil
 	}
 	flowID, err := strconv.ParseUint(*trans.OutTradeNo, 10, 64)
 	if err != nil {
-		logrus.Errorf("[Notify] strconv.ParseUint err: %v, OutTradeNo: %s", err, *trans.OutTradeNo)
+		logrus.Errorf("[PaymentNotify] strconv.ParseUint err: %v, OutTradeNo: %s", err, *trans.OutTradeNo)
 		return nil, errors.InternalError
 	}
 	amount := uint64(*trans.Amount.Total)
@@ -71,24 +71,26 @@ func (req Notify) Output(ctx context.Context) (result interface{}, err error) {
 			return nil
 		}
 		if tradeState.IsSuccess() {
-			err = payment_flow.GetController().UpdatePaymentFlowStatus(paymentFlow.FlowID, enums.PAYMENT_STATUS__SUCCESS, trans, db)
+			err = payment_flow.GetController().UpdatePaymentFlowStatus(paymentFlow, enums.PAYMENT_STATUS__SUCCESS, trans, db)
 			if err != nil {
 				return
 			}
 			// 联动订单
-			err = order.GetController().UpdateOrderStatusWithDB(db, paymentFlow.OrderID, enums.ORDER_STATUS__PAID)
-		} else if tradeState.IsFail() {
-			err = payment_flow.GetController().UpdatePaymentFlowStatus(paymentFlow.FlowID, enums.PAYMENT_STATUS__FAIL, trans, db)
+			var orderModel *databases.Order
+			orderModel, err = order.GetController().GetOrder(paymentFlow.OrderID, paymentFlow.UserID, db, true)
 			if err != nil {
-				return
+				return err
 			}
+			err = order.GetController().UpdateOrderStatusWithDB(db, orderModel, enums.ORDER_STATUS__PAID)
+		} else if tradeState.IsFail() {
+			err = payment_flow.GetController().UpdatePaymentFlowStatus(paymentFlow, enums.PAYMENT_STATUS__FAIL, trans, db)
 		}
 		return
 	})
 
 	err = tx.Do()
 	if err != nil {
-		logrus.Errorf("[Notify] tx.Do() err: %v, trans: %+v", err, trans)
+		logrus.Errorf("[PaymentNotify] tx.Do() err: %v, trans: %+v", err, trans)
 		return nil, err
 	}
 	return wechat.WechatNotifyResponse{

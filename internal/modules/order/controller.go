@@ -135,7 +135,7 @@ func (c Controller) CreateOrder(p CreateOrderParams, locker InventoryLock) (*dat
 	return order, nil
 }
 
-func (c Controller) GetOrder(orderID, userID uint64, forUpdate bool, db sqlx.DBExecutor) (order *databases.Order, err error) {
+func (c Controller) GetOrder(orderID, userID uint64, db sqlx.DBExecutor, forUpdate bool) (order *databases.Order, err error) {
 	order = &databases.Order{OrderID: orderID}
 	if forUpdate {
 		err = order.FetchByOrderIDForUpdate(db)
@@ -176,28 +176,25 @@ func (c Controller) GetOrderGoods(orderID uint64) ([]databases.OrderGoods, error
 	return goods, nil
 }
 
-func (c Controller) UpdateOrderStatusWithDB(db sqlx.DBExecutor, orderID uint64, status enums.OrderStatus) error {
-	order := &databases.Order{OrderID: orderID}
-	err := order.FetchByOrderID(db)
-	if err != nil {
-		logrus.Errorf("[UpdateOrderStatus] order.FetchByOrderID err: %v, orderID: %d, status: %s", err, orderID, status.String())
-		return errors.InternalError
-	}
-
+func (c Controller) UpdateOrderStatusWithDB(db sqlx.DBExecutor, order *databases.Order, status enums.OrderStatus) error {
 	if order.Status == status {
 		return nil
 	}
 
-	// TODO 状态流转检查
+	// 状态流转检查
+	if !order.Status.CheckNextStatusIsValid(status) {
+		logrus.Errorf("[UpdateOrderStatusWithDB] !order.Status.CheckNextStatusIsValid(status) currentStatus: %s, nextStatus: %s", order.Status.String(), status.String())
+		return errors.OrderStatusFlowIncorrect
+	}
 
 	// 变更订单状态
 	f := builder.FieldValues{
 		"Status": status,
 	}
 	order.Status = status
-	err = order.UpdateByIDWithMap(db, f)
+	err := order.UpdateByIDWithMap(db, f)
 	if err != nil {
-		logrus.Errorf("[UpdateOrderStatus] order.UpdateByIDWithMap err: %v, orderID: %d, status: %s", err, orderID, status.String())
+		logrus.Errorf("[UpdateOrderStatusWithDB] order.UpdateByIDWithMap err: %v, orderID: %d, status: %s", err, order.OrderID, status.String())
 		return errors.InternalError
 	}
 
@@ -216,28 +213,24 @@ func (c Controller) UpdateOrderStatusWithDB(db sqlx.DBExecutor, orderID uint64, 
 	return err
 }
 
-func (c Controller) UpdateOrderStatus(orderID uint64, status enums.OrderStatus) error {
-	return c.UpdateOrderStatusWithDB(c.db, orderID, status)
-}
-
 func (c Controller) CancelOrder(orderID, userID uint64, unlocker InventoryUnlock) error {
 	var order *databases.Order
 	var err error
 	tx := sqlx.NewTasks(c.db)
 	tx = tx.With(func(db sqlx.DBExecutor) error {
-		order, err = c.GetOrder(orderID, userID, true, db)
+		order, err = c.GetOrder(orderID, userID, db, true)
 		if err != nil {
 			return err
 		}
 
-		if order.Status == enums.ORDER_STATUS__CANCEL {
+		if order.Status == enums.ORDER_STATUS__CLOSED {
 			return errors.OrderCanceled
 		}
 		return nil
 	})
 
 	tx = tx.With(func(db sqlx.DBExecutor) error {
-		return c.UpdateOrderStatusWithDB(db, orderID, enums.ORDER_STATUS__CANCEL)
+		return c.UpdateOrderStatusWithDB(db, order, enums.ORDER_STATUS__CLOSED)
 	})
 
 	tx = tx.With(func(db sqlx.DBExecutor) error {

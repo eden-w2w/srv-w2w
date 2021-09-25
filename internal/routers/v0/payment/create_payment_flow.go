@@ -41,7 +41,7 @@ func (req CreatePaymentFlow) Output(ctx context.Context) (result interface{}, er
 
 	var o *databases.Order
 	tx = tx.With(func(db sqlx.DBExecutor) error {
-		model, err := order.GetController().GetOrder(req.Data.OrderID, user.UserID, true, db)
+		model, err := order.GetController().GetOrder(req.Data.OrderID, user.UserID, db, true)
 		if err != nil {
 			return err
 		}

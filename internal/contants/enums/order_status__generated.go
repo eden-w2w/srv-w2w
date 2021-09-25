@@ -12,7 +12,8 @@ var InvalidOrderStatus = errors.New("invalid OrderStatus")
 
 func init() {
 	github_com_eden_framework_enumeration.RegisterEnums("OrderStatus", map[string]string{
-		"CANCEL":   "已取消",
+		"CLOSED":   "已关闭",
+		"REFUND":   "退款中",
 		"COMPLETE": "已完成",
 		"DISPATCH": "已发货",
 		"CONFIRM":  "待发货",
@@ -25,8 +26,10 @@ func ParseOrderStatusFromString(s string) (OrderStatus, error) {
 	switch s {
 	case "":
 		return ORDER_STATUS_UNKNOWN, nil
-	case "CANCEL":
-		return ORDER_STATUS__CANCEL, nil
+	case "CLOSED":
+		return ORDER_STATUS__CLOSED, nil
+	case "REFUND":
+		return ORDER_STATUS__REFUND, nil
 	case "COMPLETE":
 		return ORDER_STATUS__COMPLETE, nil
 	case "DISPATCH":
@@ -45,8 +48,10 @@ func ParseOrderStatusFromLabelString(s string) (OrderStatus, error) {
 	switch s {
 	case "":
 		return ORDER_STATUS_UNKNOWN, nil
-	case "已取消":
-		return ORDER_STATUS__CANCEL, nil
+	case "已关闭":
+		return ORDER_STATUS__CLOSED, nil
+	case "退款中":
+		return ORDER_STATUS__REFUND, nil
 	case "已完成":
 		return ORDER_STATUS__COMPLETE, nil
 	case "已发货":
@@ -67,7 +72,8 @@ func (OrderStatus) EnumType() string {
 
 func (OrderStatus) Enums() map[int][]string {
 	return map[int][]string{
-		int(ORDER_STATUS__CANCEL):   {"CANCEL", "已取消"},
+		int(ORDER_STATUS__CLOSED):   {"CLOSED", "已关闭"},
+		int(ORDER_STATUS__REFUND):   {"REFUND", "退款中"},
 		int(ORDER_STATUS__COMPLETE): {"COMPLETE", "已完成"},
 		int(ORDER_STATUS__DISPATCH): {"DISPATCH", "已发货"},
 		int(ORDER_STATUS__CONFIRM):  {"CONFIRM", "待发货"},
@@ -80,8 +86,10 @@ func (v OrderStatus) String() string {
 	switch v {
 	case ORDER_STATUS_UNKNOWN:
 		return ""
-	case ORDER_STATUS__CANCEL:
-		return "CANCEL"
+	case ORDER_STATUS__CLOSED:
+		return "CLOSED"
+	case ORDER_STATUS__REFUND:
+		return "REFUND"
 	case ORDER_STATUS__COMPLETE:
 		return "COMPLETE"
 	case ORDER_STATUS__DISPATCH:
@@ -100,8 +108,10 @@ func (v OrderStatus) Label() string {
 	switch v {
 	case ORDER_STATUS_UNKNOWN:
 		return ""
-	case ORDER_STATUS__CANCEL:
-		return "已取消"
+	case ORDER_STATUS__CLOSED:
+		return "已关闭"
+	case ORDER_STATUS__REFUND:
+		return "退款中"
 	case ORDER_STATUS__COMPLETE:
 		return "已完成"
 	case ORDER_STATUS__DISPATCH:

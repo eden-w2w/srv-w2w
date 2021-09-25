@@ -110,7 +110,7 @@ func (c Controller) UpdatePaymentFlowRemoteID(flowID uint64, prepayID string, db
 	return nil
 }
 
-func (c Controller) UpdatePaymentFlowStatus(flowID uint64, status enums.PaymentStatus, trans *payments.Transaction, db sqlx.DBExecutor) error {
+func (c Controller) UpdatePaymentFlowStatus(flow *databases.PaymentFlow, status enums.PaymentStatus, trans *payments.Transaction, db sqlx.DBExecutor) error {
 	if trans == nil {
 		logrus.Errorf("[UpdatePaymentFlowSuccess] trans == nil")
 		return errors.InternalError
@@ -118,19 +118,24 @@ func (c Controller) UpdatePaymentFlowStatus(flowID uint64, status enums.PaymentS
 	if db == nil {
 		db = c.db
 	}
-	model := &databases.PaymentFlow{FlowID: flowID}
+
+	if !flow.Status.CheckNextStatusIsValid(status) {
+		logrus.Errorf("[UpdatePaymentFlowStatus] !flow.Status.CheckNextStatusIsValid(status), currentStatus: %s, nextStatus: %s", flow.Status, status)
+		return errors.PaymentFlowNotFound
+	}
+
 	transJson, err := trans.MarshalJSON()
 	if err != nil {
-		logrus.Errorf("[UpdatePaymentFlowSuccess] trans.MarshalJSON() err: %v, flowID: %d, status: %s", err, flowID, status.String())
+		logrus.Errorf("[UpdatePaymentFlowSuccess] trans.MarshalJSON() err: %v, flowID: %d, status: %s", err, flow.FlowID, status.String())
 		return errors.InternalError
 	}
 	fields := builder.FieldValues{
 		"RemoteData": string(transJson),
 		"Status":     status,
 	}
-	err = model.UpdateByFlowIDWithMap(db, fields)
+	err = flow.UpdateByFlowIDWithMap(db, fields)
 	if err != nil {
-		logrus.Errorf("[UpdatePaymentFlowSuccess] model.UpdateByFlowIDWithMap err: %v, flowID: %d, status: %s", err, flowID, status.String())
+		logrus.Errorf("[UpdatePaymentFlowSuccess] model.UpdateByFlowIDWithMap err: %v, flowID: %d, status: %s", err, flow.FlowID, status.String())
 		return errors.InternalError
 	}
 	return nil
