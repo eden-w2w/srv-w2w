@@ -9,26 +9,25 @@ import (
 	github_com_eden_framework_sqlx_datatypes "github.com/eden-framework/sqlx/datatypes"
 )
 
-func (Statements) PrimaryKey() []string {
+func (StatementsFlow) PrimaryKey() []string {
 	return []string{
 		"ID",
 	}
 }
 
-func (Statements) UniqueIndexUInterval() string {
+func (StatementsFlow) UniqueIndexUInterval() string {
 	return "U_interval"
 }
 
-func (Statements) UniqueIndexUStatementsID() string {
+func (StatementsFlow) UniqueIndexUStatementsID() string {
 	return "U_statements_id"
 }
 
-func (Statements) UniqueIndexes() github_com_eden_framework_sqlx_builder.Indexes {
+func (StatementsFlow) UniqueIndexes() github_com_eden_framework_sqlx_builder.Indexes {
 	return github_com_eden_framework_sqlx_builder.Indexes{
 		"U_interval": []string{
 			"UserID",
-			"StartTime",
-			"EndTime",
+			"Name",
 			"DeletedAt",
 		},
 		"U_statements_id": []string{
@@ -38,48 +37,49 @@ func (Statements) UniqueIndexes() github_com_eden_framework_sqlx_builder.Indexes
 	}
 }
 
-func (Statements) Comments() map[string]string {
+func (StatementsFlow) Comments() map[string]string {
 	return map[string]string{
 		"Amount":       "结算金额",
-		"EndTime":      "结算周期结束时间",
-		"StartTime":    "结算周期开始时间",
+		"Name":         "名称",
+		"Proportion":   "计算比例",
 		"StatementsID": "结算单ID",
 		"Status":       "结算状态",
+		"TotalSales":   "销售总额",
 		"UserID":       "用户ID",
 	}
 }
 
-var StatementsTable *github_com_eden_framework_sqlx_builder.Table
+var StatementsFlowTable *github_com_eden_framework_sqlx_builder.Table
 
 func init() {
-	StatementsTable = Config.DB.Register(&Statements{})
+	StatementsFlowTable = Config.DB.Register(&StatementsFlow{})
 }
 
-type StatementsIterator struct {
+type StatementsFlowIterator struct {
 }
 
-func (StatementsIterator) New() interface{} {
-	return &Statements{}
+func (StatementsFlowIterator) New() interface{} {
+	return &StatementsFlow{}
 }
 
-func (StatementsIterator) Resolve(v interface{}) *Statements {
-	return v.(*Statements)
+func (StatementsFlowIterator) Resolve(v interface{}) *StatementsFlow {
+	return v.(*StatementsFlow)
 }
 
-func (Statements) TableName() string {
-	return "t_statements"
+func (StatementsFlow) TableName() string {
+	return "t_statements_flow"
 }
 
-func (Statements) ColDescriptions() map[string][]string {
+func (StatementsFlow) ColDescriptions() map[string][]string {
 	return map[string][]string{
 		"Amount": []string{
 			"结算金额",
 		},
-		"EndTime": []string{
-			"结算周期结束时间",
+		"Name": []string{
+			"名称",
 		},
-		"StartTime": []string{
-			"结算周期开始时间",
+		"Proportion": []string{
+			"计算比例",
 		},
 		"StatementsID": []string{
 			"结算单ID",
@@ -87,107 +87,117 @@ func (Statements) ColDescriptions() map[string][]string {
 		"Status": []string{
 			"结算状态",
 		},
+		"TotalSales": []string{
+			"销售总额",
+		},
 		"UserID": []string{
 			"用户ID",
 		},
 	}
 }
 
-func (Statements) FieldKeyID() string {
+func (StatementsFlow) FieldKeyID() string {
 	return "ID"
 }
 
-func (m *Statements) FieldID() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyID())
+func (m *StatementsFlow) FieldID() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyID())
 }
 
-func (Statements) FieldKeyStatementsID() string {
+func (StatementsFlow) FieldKeyStatementsID() string {
 	return "StatementsID"
 }
 
-func (m *Statements) FieldStatementsID() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyStatementsID())
+func (m *StatementsFlow) FieldStatementsID() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyStatementsID())
 }
 
-func (Statements) FieldKeyUserID() string {
+func (StatementsFlow) FieldKeyUserID() string {
 	return "UserID"
 }
 
-func (m *Statements) FieldUserID() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyUserID())
+func (m *StatementsFlow) FieldUserID() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyUserID())
 }
 
-func (Statements) FieldKeyStartTime() string {
-	return "StartTime"
+func (StatementsFlow) FieldKeyName() string {
+	return "Name"
 }
 
-func (m *Statements) FieldStartTime() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyStartTime())
+func (m *StatementsFlow) FieldName() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyName())
 }
 
-func (Statements) FieldKeyEndTime() string {
-	return "EndTime"
+func (StatementsFlow) FieldKeyTotalSales() string {
+	return "TotalSales"
 }
 
-func (m *Statements) FieldEndTime() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyEndTime())
+func (m *StatementsFlow) FieldTotalSales() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyTotalSales())
 }
 
-func (Statements) FieldKeyAmount() string {
+func (StatementsFlow) FieldKeyProportion() string {
+	return "Proportion"
+}
+
+func (m *StatementsFlow) FieldProportion() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyProportion())
+}
+
+func (StatementsFlow) FieldKeyAmount() string {
 	return "Amount"
 }
 
-func (m *Statements) FieldAmount() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyAmount())
+func (m *StatementsFlow) FieldAmount() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyAmount())
 }
 
-func (Statements) FieldKeyStatus() string {
+func (StatementsFlow) FieldKeyStatus() string {
 	return "Status"
 }
 
-func (m *Statements) FieldStatus() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyStatus())
+func (m *StatementsFlow) FieldStatus() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyStatus())
 }
 
-func (Statements) FieldKeyCreatedAt() string {
+func (StatementsFlow) FieldKeyCreatedAt() string {
 	return "CreatedAt"
 }
 
-func (m *Statements) FieldCreatedAt() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyCreatedAt())
+func (m *StatementsFlow) FieldCreatedAt() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyCreatedAt())
 }
 
-func (Statements) FieldKeyUpdatedAt() string {
+func (StatementsFlow) FieldKeyUpdatedAt() string {
 	return "UpdatedAt"
 }
 
-func (m *Statements) FieldUpdatedAt() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyUpdatedAt())
+func (m *StatementsFlow) FieldUpdatedAt() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyUpdatedAt())
 }
 
-func (Statements) FieldKeyDeletedAt() string {
+func (StatementsFlow) FieldKeyDeletedAt() string {
 	return "DeletedAt"
 }
 
-func (m *Statements) FieldDeletedAt() *github_com_eden_framework_sqlx_builder.Column {
-	return StatementsTable.F(m.FieldKeyDeletedAt())
+func (m *StatementsFlow) FieldDeletedAt() *github_com_eden_framework_sqlx_builder.Column {
+	return StatementsFlowTable.F(m.FieldKeyDeletedAt())
 }
 
-func (Statements) ColRelations() map[string][]string {
+func (StatementsFlow) ColRelations() map[string][]string {
 	return map[string][]string{}
 }
 
-func (m *Statements) IndexFieldNames() []string {
+func (m *StatementsFlow) IndexFieldNames() []string {
 	return []string{
-		"EndTime",
 		"ID",
-		"StartTime",
+		"Name",
 		"StatementsID",
 		"UserID",
 	}
 }
 
-func (m *Statements) ConditionByStruct(db github_com_eden_framework_sqlx.DBExecutor) github_com_eden_framework_sqlx_builder.SqlCondition {
+func (m *StatementsFlow) ConditionByStruct(db github_com_eden_framework_sqlx.DBExecutor) github_com_eden_framework_sqlx_builder.SqlCondition {
 	table := db.T(m)
 	fieldValues := github_com_eden_framework_sqlx_builder.FieldValuesFromStructByNonZero(m)
 
@@ -214,7 +224,7 @@ func (m *Statements) ConditionByStruct(db github_com_eden_framework_sqlx.DBExecu
 	return condition
 }
 
-func (m *Statements) Create(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) Create(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	if m.CreatedAt.IsZero() {
 		m.CreatedAt = github_com_eden_framework_sqlx_datatypes.Timestamp(time.Now())
@@ -229,7 +239,7 @@ func (m *Statements) Create(db github_com_eden_framework_sqlx.DBExecutor) error 
 
 }
 
-func (m *Statements) CreateOnDuplicateWithUpdateFields(db github_com_eden_framework_sqlx.DBExecutor, updateFields []string) error {
+func (m *StatementsFlow) CreateOnDuplicateWithUpdateFields(db github_com_eden_framework_sqlx.DBExecutor, updateFields []string) error {
 
 	if len(updateFields) == 0 {
 		panic(fmt.Errorf("must have update fields"))
@@ -299,21 +309,21 @@ func (m *Statements) CreateOnDuplicateWithUpdateFields(db github_com_eden_framew
 
 }
 
-func (m *Statements) DeleteByStruct(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) DeleteByStruct(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	_, err := db.ExecExpr(
 		github_com_eden_framework_sqlx_builder.Delete().
 			From(
 				db.T(m),
 				github_com_eden_framework_sqlx_builder.Where(m.ConditionByStruct(db)),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.DeleteByStruct"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.DeleteByStruct"),
 			),
 	)
 
 	return err
 }
 
-func (m *Statements) FetchByID(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) FetchByID(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -325,7 +335,7 @@ func (m *Statements) FetchByID(db github_com_eden_framework_sqlx.DBExecutor) err
 					table.F("ID").Eq(m.ID),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				)),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.FetchByID"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.FetchByID"),
 			),
 		m,
 	)
@@ -333,7 +343,7 @@ func (m *Statements) FetchByID(db github_com_eden_framework_sqlx.DBExecutor) err
 	return err
 }
 
-func (m *Statements) UpdateByIDWithMap(db github_com_eden_framework_sqlx.DBExecutor, fieldValues github_com_eden_framework_sqlx_builder.FieldValues) error {
+func (m *StatementsFlow) UpdateByIDWithMap(db github_com_eden_framework_sqlx.DBExecutor, fieldValues github_com_eden_framework_sqlx_builder.FieldValues) error {
 
 	if _, ok := fieldValues["UpdatedAt"]; !ok {
 		fieldValues["UpdatedAt"] = github_com_eden_framework_sqlx_datatypes.Timestamp(time.Now())
@@ -348,7 +358,7 @@ func (m *Statements) UpdateByIDWithMap(db github_com_eden_framework_sqlx.DBExecu
 					table.F("ID").Eq(m.ID),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.UpdateByIDWithMap"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.UpdateByIDWithMap"),
 			).
 			Set(table.AssignmentsByFieldValues(fieldValues)...),
 	)
@@ -366,14 +376,14 @@ func (m *Statements) UpdateByIDWithMap(db github_com_eden_framework_sqlx.DBExecu
 
 }
 
-func (m *Statements) UpdateByIDWithStruct(db github_com_eden_framework_sqlx.DBExecutor, zeroFields ...string) error {
+func (m *StatementsFlow) UpdateByIDWithStruct(db github_com_eden_framework_sqlx.DBExecutor, zeroFields ...string) error {
 
 	fieldValues := github_com_eden_framework_sqlx_builder.FieldValuesFromStructByNonZero(m, zeroFields...)
 	return m.UpdateByIDWithMap(db, fieldValues)
 
 }
 
-func (m *Statements) FetchByIDForUpdate(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) FetchByIDForUpdate(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -386,7 +396,7 @@ func (m *Statements) FetchByIDForUpdate(db github_com_eden_framework_sqlx.DBExec
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				)),
 				github_com_eden_framework_sqlx_builder.ForUpdate(),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.FetchByIDForUpdate"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.FetchByIDForUpdate"),
 			),
 		m,
 	)
@@ -394,7 +404,7 @@ func (m *Statements) FetchByIDForUpdate(db github_com_eden_framework_sqlx.DBExec
 	return err
 }
 
-func (m *Statements) DeleteByID(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) DeleteByID(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -405,13 +415,13 @@ func (m *Statements) DeleteByID(db github_com_eden_framework_sqlx.DBExecutor) er
 					table.F("ID").Eq(m.ID),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				)),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.DeleteByID"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.DeleteByID"),
 			))
 
 	return err
 }
 
-func (m *Statements) SoftDeleteByID(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) SoftDeleteByID(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -431,7 +441,7 @@ func (m *Statements) SoftDeleteByID(db github_com_eden_framework_sqlx.DBExecutor
 					table.F("ID").Eq(m.ID),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.SoftDeleteByID"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.SoftDeleteByID"),
 			).
 			Set(table.AssignmentsByFieldValues(fieldValues)...),
 	)
@@ -440,7 +450,7 @@ func (m *Statements) SoftDeleteByID(db github_com_eden_framework_sqlx.DBExecutor
 
 }
 
-func (m *Statements) FetchByStatementsID(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) FetchByStatementsID(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -452,7 +462,7 @@ func (m *Statements) FetchByStatementsID(db github_com_eden_framework_sqlx.DBExe
 					table.F("StatementsID").Eq(m.StatementsID),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				)),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.FetchByStatementsID"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.FetchByStatementsID"),
 			),
 		m,
 	)
@@ -460,7 +470,7 @@ func (m *Statements) FetchByStatementsID(db github_com_eden_framework_sqlx.DBExe
 	return err
 }
 
-func (m *Statements) UpdateByStatementsIDWithMap(db github_com_eden_framework_sqlx.DBExecutor, fieldValues github_com_eden_framework_sqlx_builder.FieldValues) error {
+func (m *StatementsFlow) UpdateByStatementsIDWithMap(db github_com_eden_framework_sqlx.DBExecutor, fieldValues github_com_eden_framework_sqlx_builder.FieldValues) error {
 
 	if _, ok := fieldValues["UpdatedAt"]; !ok {
 		fieldValues["UpdatedAt"] = github_com_eden_framework_sqlx_datatypes.Timestamp(time.Now())
@@ -475,7 +485,7 @@ func (m *Statements) UpdateByStatementsIDWithMap(db github_com_eden_framework_sq
 					table.F("StatementsID").Eq(m.StatementsID),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.UpdateByStatementsIDWithMap"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.UpdateByStatementsIDWithMap"),
 			).
 			Set(table.AssignmentsByFieldValues(fieldValues)...),
 	)
@@ -493,14 +503,14 @@ func (m *Statements) UpdateByStatementsIDWithMap(db github_com_eden_framework_sq
 
 }
 
-func (m *Statements) UpdateByStatementsIDWithStruct(db github_com_eden_framework_sqlx.DBExecutor, zeroFields ...string) error {
+func (m *StatementsFlow) UpdateByStatementsIDWithStruct(db github_com_eden_framework_sqlx.DBExecutor, zeroFields ...string) error {
 
 	fieldValues := github_com_eden_framework_sqlx_builder.FieldValuesFromStructByNonZero(m, zeroFields...)
 	return m.UpdateByStatementsIDWithMap(db, fieldValues)
 
 }
 
-func (m *Statements) FetchByStatementsIDForUpdate(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) FetchByStatementsIDForUpdate(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -513,7 +523,7 @@ func (m *Statements) FetchByStatementsIDForUpdate(db github_com_eden_framework_s
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				)),
 				github_com_eden_framework_sqlx_builder.ForUpdate(),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.FetchByStatementsIDForUpdate"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.FetchByStatementsIDForUpdate"),
 			),
 		m,
 	)
@@ -521,7 +531,7 @@ func (m *Statements) FetchByStatementsIDForUpdate(db github_com_eden_framework_s
 	return err
 }
 
-func (m *Statements) DeleteByStatementsID(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) DeleteByStatementsID(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -532,13 +542,13 @@ func (m *Statements) DeleteByStatementsID(db github_com_eden_framework_sqlx.DBEx
 					table.F("StatementsID").Eq(m.StatementsID),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				)),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.DeleteByStatementsID"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.DeleteByStatementsID"),
 			))
 
 	return err
 }
 
-func (m *Statements) SoftDeleteByStatementsID(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) SoftDeleteByStatementsID(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -558,7 +568,7 @@ func (m *Statements) SoftDeleteByStatementsID(db github_com_eden_framework_sqlx.
 					table.F("StatementsID").Eq(m.StatementsID),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.SoftDeleteByStatementsID"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.SoftDeleteByStatementsID"),
 			).
 			Set(table.AssignmentsByFieldValues(fieldValues)...),
 	)
@@ -567,7 +577,7 @@ func (m *Statements) SoftDeleteByStatementsID(db github_com_eden_framework_sqlx.
 
 }
 
-func (m *Statements) FetchByUserIDAndStartTimeAndEndTime(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) FetchByUserIDAndName(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -577,11 +587,10 @@ func (m *Statements) FetchByUserIDAndStartTimeAndEndTime(db github_com_eden_fram
 				db.T(m),
 				github_com_eden_framework_sqlx_builder.Where(github_com_eden_framework_sqlx_builder.And(
 					table.F("UserID").Eq(m.UserID),
-					table.F("StartTime").Eq(m.StartTime),
-					table.F("EndTime").Eq(m.EndTime),
+					table.F("Name").Eq(m.Name),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				)),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.FetchByUserIDAndStartTimeAndEndTime"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.FetchByUserIDAndName"),
 			),
 		m,
 	)
@@ -589,7 +598,7 @@ func (m *Statements) FetchByUserIDAndStartTimeAndEndTime(db github_com_eden_fram
 	return err
 }
 
-func (m *Statements) UpdateByUserIDAndStartTimeAndEndTimeWithMap(db github_com_eden_framework_sqlx.DBExecutor, fieldValues github_com_eden_framework_sqlx_builder.FieldValues) error {
+func (m *StatementsFlow) UpdateByUserIDAndNameWithMap(db github_com_eden_framework_sqlx.DBExecutor, fieldValues github_com_eden_framework_sqlx_builder.FieldValues) error {
 
 	if _, ok := fieldValues["UpdatedAt"]; !ok {
 		fieldValues["UpdatedAt"] = github_com_eden_framework_sqlx_datatypes.Timestamp(time.Now())
@@ -602,11 +611,10 @@ func (m *Statements) UpdateByUserIDAndStartTimeAndEndTimeWithMap(db github_com_e
 			Where(
 				github_com_eden_framework_sqlx_builder.And(
 					table.F("UserID").Eq(m.UserID),
-					table.F("StartTime").Eq(m.StartTime),
-					table.F("EndTime").Eq(m.EndTime),
+					table.F("Name").Eq(m.Name),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.UpdateByUserIDAndStartTimeAndEndTimeWithMap"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.UpdateByUserIDAndNameWithMap"),
 			).
 			Set(table.AssignmentsByFieldValues(fieldValues)...),
 	)
@@ -617,21 +625,21 @@ func (m *Statements) UpdateByUserIDAndStartTimeAndEndTimeWithMap(db github_com_e
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		return m.FetchByUserIDAndStartTimeAndEndTime(db)
+		return m.FetchByUserIDAndName(db)
 	}
 
 	return nil
 
 }
 
-func (m *Statements) UpdateByUserIDAndStartTimeAndEndTimeWithStruct(db github_com_eden_framework_sqlx.DBExecutor, zeroFields ...string) error {
+func (m *StatementsFlow) UpdateByUserIDAndNameWithStruct(db github_com_eden_framework_sqlx.DBExecutor, zeroFields ...string) error {
 
 	fieldValues := github_com_eden_framework_sqlx_builder.FieldValuesFromStructByNonZero(m, zeroFields...)
-	return m.UpdateByUserIDAndStartTimeAndEndTimeWithMap(db, fieldValues)
+	return m.UpdateByUserIDAndNameWithMap(db, fieldValues)
 
 }
 
-func (m *Statements) FetchByUserIDAndStartTimeAndEndTimeForUpdate(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) FetchByUserIDAndNameForUpdate(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -641,12 +649,11 @@ func (m *Statements) FetchByUserIDAndStartTimeAndEndTimeForUpdate(db github_com_
 				db.T(m),
 				github_com_eden_framework_sqlx_builder.Where(github_com_eden_framework_sqlx_builder.And(
 					table.F("UserID").Eq(m.UserID),
-					table.F("StartTime").Eq(m.StartTime),
-					table.F("EndTime").Eq(m.EndTime),
+					table.F("Name").Eq(m.Name),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				)),
 				github_com_eden_framework_sqlx_builder.ForUpdate(),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.FetchByUserIDAndStartTimeAndEndTimeForUpdate"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.FetchByUserIDAndNameForUpdate"),
 			),
 		m,
 	)
@@ -654,7 +661,7 @@ func (m *Statements) FetchByUserIDAndStartTimeAndEndTimeForUpdate(db github_com_
 	return err
 }
 
-func (m *Statements) DeleteByUserIDAndStartTimeAndEndTime(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) DeleteByUserIDAndName(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -663,17 +670,16 @@ func (m *Statements) DeleteByUserIDAndStartTimeAndEndTime(db github_com_eden_fra
 			From(db.T(m),
 				github_com_eden_framework_sqlx_builder.Where(github_com_eden_framework_sqlx_builder.And(
 					table.F("UserID").Eq(m.UserID),
-					table.F("StartTime").Eq(m.StartTime),
-					table.F("EndTime").Eq(m.EndTime),
+					table.F("Name").Eq(m.Name),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				)),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.DeleteByUserIDAndStartTimeAndEndTime"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.DeleteByUserIDAndName"),
 			))
 
 	return err
 }
 
-func (m *Statements) SoftDeleteByUserIDAndStartTimeAndEndTime(db github_com_eden_framework_sqlx.DBExecutor) error {
+func (m *StatementsFlow) SoftDeleteByUserIDAndName(db github_com_eden_framework_sqlx.DBExecutor) error {
 
 	table := db.T(m)
 
@@ -691,11 +697,10 @@ func (m *Statements) SoftDeleteByUserIDAndStartTimeAndEndTime(db github_com_eden
 			Where(
 				github_com_eden_framework_sqlx_builder.And(
 					table.F("UserID").Eq(m.UserID),
-					table.F("StartTime").Eq(m.StartTime),
-					table.F("EndTime").Eq(m.EndTime),
+					table.F("Name").Eq(m.Name),
 					table.F("DeletedAt").Eq(m.DeletedAt),
 				),
-				github_com_eden_framework_sqlx_builder.Comment("Statements.SoftDeleteByUserIDAndStartTimeAndEndTime"),
+				github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.SoftDeleteByUserIDAndName"),
 			).
 			Set(table.AssignmentsByFieldValues(fieldValues)...),
 	)
@@ -704,9 +709,9 @@ func (m *Statements) SoftDeleteByUserIDAndStartTimeAndEndTime(db github_com_eden
 
 }
 
-func (m *Statements) List(db github_com_eden_framework_sqlx.DBExecutor, condition github_com_eden_framework_sqlx_builder.SqlCondition, additions ...github_com_eden_framework_sqlx_builder.Addition) ([]Statements, error) {
+func (m *StatementsFlow) List(db github_com_eden_framework_sqlx.DBExecutor, condition github_com_eden_framework_sqlx_builder.SqlCondition, additions ...github_com_eden_framework_sqlx_builder.Addition) ([]StatementsFlow, error) {
 
-	list := make([]Statements, 0)
+	list := make([]StatementsFlow, 0)
 
 	table := db.T(m)
 	_ = table
@@ -715,7 +720,7 @@ func (m *Statements) List(db github_com_eden_framework_sqlx.DBExecutor, conditio
 
 	finalAdditions := []github_com_eden_framework_sqlx_builder.Addition{
 		github_com_eden_framework_sqlx_builder.Where(condition),
-		github_com_eden_framework_sqlx_builder.Comment("Statements.List"),
+		github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.List"),
 	}
 
 	if len(additions) > 0 {
@@ -732,7 +737,7 @@ func (m *Statements) List(db github_com_eden_framework_sqlx.DBExecutor, conditio
 
 }
 
-func (m *Statements) Count(db github_com_eden_framework_sqlx.DBExecutor, condition github_com_eden_framework_sqlx_builder.SqlCondition, additions ...github_com_eden_framework_sqlx_builder.Addition) (int, error) {
+func (m *StatementsFlow) Count(db github_com_eden_framework_sqlx.DBExecutor, condition github_com_eden_framework_sqlx_builder.SqlCondition, additions ...github_com_eden_framework_sqlx_builder.Addition) (int, error) {
 
 	count := -1
 
@@ -743,7 +748,7 @@ func (m *Statements) Count(db github_com_eden_framework_sqlx.DBExecutor, conditi
 
 	finalAdditions := []github_com_eden_framework_sqlx_builder.Addition{
 		github_com_eden_framework_sqlx_builder.Where(condition),
-		github_com_eden_framework_sqlx_builder.Comment("Statements.Count"),
+		github_com_eden_framework_sqlx_builder.Comment("StatementsFlow.Count"),
 	}
 
 	if len(additions) > 0 {
@@ -762,21 +767,7 @@ func (m *Statements) Count(db github_com_eden_framework_sqlx.DBExecutor, conditi
 
 }
 
-func (m *Statements) BatchFetchByEndTimeList(db github_com_eden_framework_sqlx.DBExecutor, values []github_com_eden_framework_sqlx_datatypes.Timestamp) ([]Statements, error) {
-
-	if len(values) == 0 {
-		return nil, nil
-	}
-
-	table := db.T(m)
-
-	condition := table.F("EndTime").In(values)
-
-	return m.List(db, condition)
-
-}
-
-func (m *Statements) BatchFetchByIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]Statements, error) {
+func (m *StatementsFlow) BatchFetchByIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]StatementsFlow, error) {
 
 	if len(values) == 0 {
 		return nil, nil
@@ -790,7 +781,7 @@ func (m *Statements) BatchFetchByIDList(db github_com_eden_framework_sqlx.DBExec
 
 }
 
-func (m *Statements) BatchFetchByStartTimeList(db github_com_eden_framework_sqlx.DBExecutor, values []github_com_eden_framework_sqlx_datatypes.Timestamp) ([]Statements, error) {
+func (m *StatementsFlow) BatchFetchByNameList(db github_com_eden_framework_sqlx.DBExecutor, values []string) ([]StatementsFlow, error) {
 
 	if len(values) == 0 {
 		return nil, nil
@@ -798,13 +789,13 @@ func (m *Statements) BatchFetchByStartTimeList(db github_com_eden_framework_sqlx
 
 	table := db.T(m)
 
-	condition := table.F("StartTime").In(values)
+	condition := table.F("Name").In(values)
 
 	return m.List(db, condition)
 
 }
 
-func (m *Statements) BatchFetchByStatementsIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]Statements, error) {
+func (m *StatementsFlow) BatchFetchByStatementsIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]StatementsFlow, error) {
 
 	if len(values) == 0 {
 		return nil, nil
@@ -818,7 +809,7 @@ func (m *Statements) BatchFetchByStatementsIDList(db github_com_eden_framework_s
 
 }
 
-func (m *Statements) BatchFetchByUserIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]Statements, error) {
+func (m *StatementsFlow) BatchFetchByUserIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]StatementsFlow, error) {
 
 	if len(values) == 0 {
 		return nil, nil

@@ -12,26 +12,20 @@ import (
 var controller *Controller
 
 type Controller struct {
-	db                sqlx.DBExecutor
-	defaultProportion float64
+	db sqlx.DBExecutor
 }
 
-func newController(db sqlx.DBExecutor, proportion float64) *Controller {
+func newController(db sqlx.DBExecutor) *Controller {
 	return &Controller{
-		db:                db,
-		defaultProportion: proportion,
+		db: db,
 	}
 }
 
 func GetController() *Controller {
 	if controller == nil {
-		controller = newController(global.Config.MasterDB, global.Config.GlobalProportion)
+		controller = newController(global.Config.MasterDB)
 	}
 	return controller
-}
-
-func (c Controller) GetProportion() float64 {
-	return c.defaultProportion
 }
 
 func (c Controller) CreatePromotionFlow(params CreatePromotionFlowParams, db sqlx.DBExecutor) (*databases.PromotionFlow, error) {
@@ -46,9 +40,7 @@ func (c Controller) CreatePromotionFlow(params CreatePromotionFlowParams, db sql
 		RefererID:       params.RefererID,
 		RefererNickName: params.RefererNickName,
 		Amount:          params.Amount,
-		Proportion:      params.Proportion,
 		PaymentFlowID:   params.PaymentFlowID,
-		StatementID:     params.StatementID,
 	}
 	err := model.Create(db)
 	if err != nil {
@@ -56,4 +48,13 @@ func (c Controller) CreatePromotionFlow(params CreatePromotionFlowParams, db sql
 		return nil, errors.InternalError
 	}
 	return model, nil
+}
+
+func (c Controller) GetPromotionFlows(params GetPromotionFlowParams) (list []databases.PromotionFlow, err error) {
+	model := &databases.PromotionFlow{}
+	list, err = model.List(c.db, params.Conditions(), params.Additions()...)
+	if err != nil {
+		logrus.Errorf("[GetPromotionFlows] model.List err: %v, params: %+v", err, params)
+	}
+	return
 }

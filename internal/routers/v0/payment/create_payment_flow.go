@@ -68,6 +68,9 @@ func (req CreatePaymentFlow) Output(ctx context.Context) (result interface{}, er
 	})
 
 	tx = tx.With(func(db sqlx.DBExecutor) error {
+		if wechatResp == nil {
+			return nil
+		}
 		return payment_flow.GetController().UpdatePaymentFlowRemoteID(paymentFlow.FlowID, *wechatResp.PrepayId, db)
 	})
 

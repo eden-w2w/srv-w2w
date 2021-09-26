@@ -5,7 +5,6 @@ import (
 	"github.com/eden-w2w/srv-w2w/internal/databases"
 	"github.com/eden-w2w/srv-w2w/internal/modules/payment_flow"
 	"github.com/eden-w2w/srv-w2w/internal/modules/promotion_flow"
-	"github.com/eden-w2w/srv-w2w/internal/modules/statement"
 	"github.com/eden-w2w/srv-w2w/internal/modules/user"
 )
 
@@ -43,27 +42,18 @@ func (o *OrderEvent) OnOrderCompleteEvent(db sqlx.DBExecutor, order *databases.O
 		return err
 	}
 
-	// 计算提成并创建提成流水
+	// 创建提成流水
 	proCtrl := promotion_flow.GetController()
-	proportion := proCtrl.GetProportion()
-	proAmount := uint64(float64(flow.Amount) * proportion) // 提成金额，单位分，向下取整
-
-	// 生成结算单
-	state, err := statement.GetController().CreateStatementByNow(refererUser.UserID, proAmount, db)
-	if err != nil {
-		return err
-	}
-
 	_, err = proCtrl.CreatePromotionFlow(promotion_flow.CreatePromotionFlowParams{
 		UserID:          refererUser.UserID,
 		UserNickName:    refererUser.NickName,
 		RefererID:       orderUser.UserID,
 		RefererNickName: orderUser.NickName,
-		Amount:          proAmount,
-		Proportion:      proportion,
+		Amount:          flow.Amount,
 		PaymentFlowID:   flow.FlowID,
-		StatementID:     state.StatementsID,
 	}, db)
+
+	// 更新提成概况
 	return err
 }
 

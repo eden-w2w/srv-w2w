@@ -65,6 +65,7 @@ func (c Controller) CreatePaymentFlow(params CreatePaymentFlowParams, db sqlx.DB
 		PaymentMethod: params.PaymentMethod,
 		Status:        enums.PAYMENT_STATUS__CREATED,
 		ExpiredAt:     datatypes.MySQLTimestamp(time.Now().Add(global.Config.PaymentFlowExpireIn)),
+		RemoteData:    "{}",
 	}
 	err := model.Create(c.db)
 	if err != nil {

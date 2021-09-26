@@ -20,11 +20,12 @@ func (PromotionFlow) Indexes() github_com_eden_framework_sqlx_builder.Indexes {
 		"I_payment_flow_id": []string{
 			"PaymentFlowID",
 		},
-		"I_statement_id": []string{
-			"StatementID",
+		"I_statement": []string{
+			"StatementsID",
 		},
 		"I_user_id": []string{
 			"UserID",
+			"CreatedAt",
 		},
 	}
 }
@@ -44,13 +45,12 @@ func (PromotionFlow) UniqueIndexes() github_com_eden_framework_sqlx_builder.Inde
 
 func (PromotionFlow) Comments() map[string]string {
 	return map[string]string{
-		"Amount":          "奖励金额",
+		"Amount":          "订单金额",
 		"FlowID":          "流水ID",
 		"PaymentFlowID":   "关联的支付流水",
-		"Proportion":      "奖励比例",
 		"RefererID":       "奖励来源用户ID",
 		"RefererNickName": "奖励来源的用户昵称",
-		"StatementID":     "关联的结算单",
+		"StatementsID":    "关联的结算单ID",
 		"UserID":          "获得奖励的用户ID",
 		"UserNickName":    "获得奖励的用户昵称",
 	}
@@ -80,7 +80,7 @@ func (PromotionFlow) TableName() string {
 func (PromotionFlow) ColDescriptions() map[string][]string {
 	return map[string][]string{
 		"Amount": []string{
-			"奖励金额",
+			"订单金额",
 		},
 		"FlowID": []string{
 			"流水ID",
@@ -88,17 +88,14 @@ func (PromotionFlow) ColDescriptions() map[string][]string {
 		"PaymentFlowID": []string{
 			"关联的支付流水",
 		},
-		"Proportion": []string{
-			"奖励比例",
-		},
 		"RefererID": []string{
 			"奖励来源用户ID",
 		},
 		"RefererNickName": []string{
 			"奖励来源的用户昵称",
 		},
-		"StatementID": []string{
-			"关联的结算单",
+		"StatementsID": []string{
+			"关联的结算单ID",
 		},
 		"UserID": []string{
 			"获得奖励的用户ID",
@@ -165,14 +162,6 @@ func (m *PromotionFlow) FieldAmount() *github_com_eden_framework_sqlx_builder.Co
 	return PromotionFlowTable.F(m.FieldKeyAmount())
 }
 
-func (PromotionFlow) FieldKeyProportion() string {
-	return "Proportion"
-}
-
-func (m *PromotionFlow) FieldProportion() *github_com_eden_framework_sqlx_builder.Column {
-	return PromotionFlowTable.F(m.FieldKeyProportion())
-}
-
 func (PromotionFlow) FieldKeyPaymentFlowID() string {
 	return "PaymentFlowID"
 }
@@ -181,12 +170,12 @@ func (m *PromotionFlow) FieldPaymentFlowID() *github_com_eden_framework_sqlx_bui
 	return PromotionFlowTable.F(m.FieldKeyPaymentFlowID())
 }
 
-func (PromotionFlow) FieldKeyStatementID() string {
-	return "StatementID"
+func (PromotionFlow) FieldKeyStatementsID() string {
+	return "StatementsID"
 }
 
-func (m *PromotionFlow) FieldStatementID() *github_com_eden_framework_sqlx_builder.Column {
-	return PromotionFlowTable.F(m.FieldKeyStatementID())
+func (m *PromotionFlow) FieldStatementsID() *github_com_eden_framework_sqlx_builder.Column {
+	return PromotionFlowTable.F(m.FieldKeyStatementsID())
 }
 
 func (PromotionFlow) FieldKeyCreatedAt() string {
@@ -219,10 +208,11 @@ func (PromotionFlow) ColRelations() map[string][]string {
 
 func (m *PromotionFlow) IndexFieldNames() []string {
 	return []string{
+		"CreatedAt",
 		"FlowID",
 		"ID",
 		"PaymentFlowID",
-		"StatementID",
+		"StatementsID",
 		"UserID",
 	}
 }
@@ -665,6 +655,20 @@ func (m *PromotionFlow) Count(db github_com_eden_framework_sqlx.DBExecutor, cond
 
 }
 
+func (m *PromotionFlow) BatchFetchByCreatedAtList(db github_com_eden_framework_sqlx.DBExecutor, values []github_com_eden_framework_sqlx_datatypes.Timestamp) ([]PromotionFlow, error) {
+
+	if len(values) == 0 {
+		return nil, nil
+	}
+
+	table := db.T(m)
+
+	condition := table.F("CreatedAt").In(values)
+
+	return m.List(db, condition)
+
+}
+
 func (m *PromotionFlow) BatchFetchByFlowIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]PromotionFlow, error) {
 
 	if len(values) == 0 {
@@ -707,7 +711,7 @@ func (m *PromotionFlow) BatchFetchByPaymentFlowIDList(db github_com_eden_framewo
 
 }
 
-func (m *PromotionFlow) BatchFetchByStatementIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]PromotionFlow, error) {
+func (m *PromotionFlow) BatchFetchByStatementsIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]PromotionFlow, error) {
 
 	if len(values) == 0 {
 		return nil, nil
@@ -715,7 +719,7 @@ func (m *PromotionFlow) BatchFetchByStatementIDList(db github_com_eden_framework
 
 	table := db.T(m)
 
-	condition := table.F("StatementID").In(values)
+	condition := table.F("StatementsID").In(values)
 
 	return m.List(db, condition)
 

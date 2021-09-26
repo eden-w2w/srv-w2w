@@ -3,4 +3,6 @@ srv-w2w
 .idea
 go.sum
 build/configs/local.yml
+build/project.yml
 api/openapi.json
+test_*.go

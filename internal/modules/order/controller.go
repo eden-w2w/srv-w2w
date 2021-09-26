@@ -3,10 +3,12 @@ package order
 import (
 	"github.com/eden-framework/sqlx"
 	"github.com/eden-framework/sqlx/builder"
+	"github.com/eden-framework/sqlx/datatypes"
 	"github.com/eden-w2w/srv-w2w/internal/global"
 	"github.com/eden-w2w/srv-w2w/internal/modules/id_generator"
 	"github.com/eden-w2w/srv-w2w/internal/modules/payment_flow"
 	"github.com/sirupsen/logrus"
+	"time"
 
 	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
 	"github.com/eden-w2w/srv-w2w/internal/contants/errors"
@@ -17,18 +19,19 @@ var controller *Controller
 
 func GetController() *Controller {
 	if controller == nil {
-		controller = newController(global.Config.MasterDB)
+		controller = newController(global.Config.MasterDB, global.Config.OrderExpireIn)
 	}
 	return controller
 }
 
 type Controller struct {
-	db           sqlx.DBExecutor
-	eventHandler EventHandler
+	db                  sqlx.DBExecutor
+	orderExpireDuration time.Duration
+	eventHandler        EventHandler
 }
 
-func newController(db sqlx.DBExecutor) *Controller {
-	return &Controller{db: db}
+func newController(db sqlx.DBExecutor, d time.Duration) *Controller {
+	return &Controller{db: db, orderExpireDuration: d}
 }
 
 func (c *Controller) WithEventHandler(h EventHandler) *Controller {
@@ -75,6 +78,7 @@ func (c Controller) CreateOrder(p CreateOrderParams, locker InventoryLock) (*dat
 		ShippingAddr:  p.ShippingAddr,
 		Mobile:        p.Mobile,
 		Status:        enums.ORDER_STATUS__CREATED,
+		ExpiredAt:     datatypes.MySQLTimestamp(time.Now().Add(c.orderExpireDuration)),
 	}
 
 	tx := sqlx.NewTasks(c.db)

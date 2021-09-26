@@ -49,7 +49,7 @@ func (PaymentFlow) Comments() map[string]string {
 		"FlowID":        "流水ID",
 		"OrderID":       "关联订单号",
 		"PaymentMethod": "支付方式",
-		"RemoteData":    "支付系统原始报文",
+		"RemoteData":    "支付系统回调原始报文",
 		"RemoteFlowID":  "支付系统流水号",
 		"Status":        "支付状态",
 		"UserID":        "用户ID",
@@ -95,7 +95,7 @@ func (PaymentFlow) ColDescriptions() map[string][]string {
 			"支付方式",
 		},
 		"RemoteData": []string{
-			"支付系统原始报文",
+			"支付系统回调原始报文",
 		},
 		"RemoteFlowID": []string{
 			"支付系统流水号",

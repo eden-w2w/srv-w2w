@@ -1,6 +1,7 @@
 package global
 
 import (
+	"fmt"
 	"github.com/eden-framework/courier/transport_grpc"
 	"github.com/eden-framework/courier/transport_http"
 	"github.com/eden-framework/eden-framework/pkg/client/mysql"
@@ -47,6 +48,15 @@ type StatementConfig struct {
 	StatementDate uint8
 }
 
+func (c StatementConfig) ToStatementCronRule() string {
+	if c.StatementType == enums.STATEMENT_TYPE__WEEK {
+		return fmt.Sprintf("0 0 0 * * %d", c.StatementDate)
+	} else if c.StatementType == enums.STATEMENT_TYPE__MONTH {
+		return fmt.Sprintf("0 0 0 %d * *", c.StatementDate)
+	}
+	return ""
+}
+
 var Config = struct {
 	LogLevel logrus.Level
 
@@ -64,8 +74,8 @@ var Config = struct {
 	// wechat config
 	Wechat
 
-	// 全局默认提成比例
-	GlobalProportion float64
+	// 订单超时时间
+	OrderExpireIn time.Duration
 	// 支付流水默认超时时间
 	PaymentFlowExpireIn time.Duration
 
@@ -90,8 +100,8 @@ var Config = struct {
 		NodeBits:   10,
 		StepBits:   12,
 	},
-	GlobalProportion:    0.005,
-	PaymentFlowExpireIn: 30 * time.Minute,
+	OrderExpireIn:       30 * time.Minute,
+	PaymentFlowExpireIn: 5 * time.Minute,
 	StatementConfig: StatementConfig{
 		StatementType: enums.STATEMENT_TYPE__WEEK,
 		StatementDate: 1,
