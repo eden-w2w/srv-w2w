@@ -2,19 +2,27 @@ package test
 
 import (
 	"github.com/eden-w2w/srv-w2w/internal/databases"
+	"github.com/eden-w2w/srv-w2w/internal/global"
+	"github.com/eden-w2w/srv-w2w/internal/modules/order"
 	"github.com/eden-w2w/srv-w2w/internal/modules/user"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-var userModel *databases.User
+var orderUserModel *databases.User
+var promotionUserModel *databases.User
 var orderModel *databases.Order
 var paymentFlowModel *databases.PaymentFlow
+var promotionFlowModel []databases.PromotionFlow
 
 func TestAll(t *testing.T) {
 	u, err := user.GetController().GetUserByUserID(1441156099381141504, nil, false)
 	assert.Nil(t, err)
-	userModel = u
+	orderUserModel = u
+
+	u, err = user.GetController().GetUserByUserID(1442548676592422912, nil, false)
+	assert.Nil(t, err)
+	promotionUserModel = u
 
 	// 创建订单
 	t.Run("testCreateOrder", testCreateOrder)
@@ -27,4 +35,23 @@ func TestAll(t *testing.T) {
 	t.Run("testUpdateOrderStatusIncorrect", testUpdateOrderStatusIncorrect)
 	// 正确的订单状态流转
 	t.Run("testUpdateOrderStatus", testUpdateOrderStatus)
+
+	// 查看我的钱包概览
+	t.Run("testGetMyPromotionSummary", testGetMyPromotionSummary)
+
+	// 清理
+	goods, err := order.GetController().GetOrderGoods(orderModel.OrderID)
+	assert.Nil(t, err)
+	for _, good := range goods {
+		_ = good.DeleteByOrderIDAndGoodsID(global.Config.MasterDB)
+	}
+	if orderModel != nil {
+		_ = orderModel.DeleteByOrderID(global.Config.MasterDB)
+	}
+	if paymentFlowModel != nil {
+		_ = paymentFlowModel.DeleteByFlowID(global.Config.MasterDB)
+	}
+	for _, promotionFlow := range promotionFlowModel {
+		_ = promotionFlow.DeleteByFlowID(global.Config.MasterDB)
+	}
 }

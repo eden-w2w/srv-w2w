@@ -29,7 +29,9 @@ type GetPromotionFlowParams struct {
 	// 关联的支付流水
 	PaymentFlowID uint64 `name:"paymentFlowID,string" in:"query"`
 	// 关联的结算单ID
-	StatementsID uint64 `name:"statementsID,string" in:"query"`
+	SettlementID uint64 `name:"settlementID,string" in:"query"`
+	// 是否只查询未结算的流水
+	IsNotSettlement bool `name:"isSettlement" in:"query"`
 	modules.Pagination
 }
 
@@ -45,8 +47,10 @@ func (p GetPromotionFlowParams) Conditions() builder.SqlCondition {
 	if p.PaymentFlowID != 0 {
 		condition = builder.And(condition, model.FieldPaymentFlowID().Eq(p.PaymentFlowID))
 	}
-	if p.StatementsID != 0 {
-		condition = builder.And(condition, model.FieldStatementsID().Eq(p.StatementsID))
+	if p.IsNotSettlement {
+		condition = builder.And(condition, model.FieldSettlementID().Eq(0))
+	} else if p.SettlementID != 0 {
+		condition = builder.And(condition, model.FieldSettlementID().Eq(p.SettlementID))
 	}
 	return condition
 }

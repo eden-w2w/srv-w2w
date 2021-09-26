@@ -11,7 +11,7 @@ import (
 	"github.com/eden-w2w/srv-w2w/internal/modules/order"
 	"github.com/eden-w2w/srv-w2w/internal/modules/payment_flow"
 	"github.com/eden-w2w/srv-w2w/internal/modules/promotion_flow"
-	"github.com/eden-w2w/srv-w2w/internal/modules/statement_flow"
+	"github.com/eden-w2w/srv-w2w/internal/modules/settlement_flow"
 	"github.com/eden-w2w/srv-w2w/internal/modules/user"
 	"github.com/eden-w2w/srv-w2w/internal/modules/wechat"
 	"github.com/sirupsen/logrus"
@@ -34,7 +34,7 @@ func runner(ctx *context.WaitStopContext) error {
 	order.GetController().WithEventHandler(events.NewOrderEvent())
 	payment_flow.GetController()
 	promotion_flow.GetController()
-	statement_flow.GetController()
+	settlement_flow.GetController()
 
 	return nil
 }

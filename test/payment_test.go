@@ -14,7 +14,7 @@ import (
 
 func testCreatePaymentFlow(t *testing.T) {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, middleware.AuthContextKey, userModel)
+	ctx = context.WithValue(ctx, middleware.AuthContextKey, orderUserModel)
 
 	request := payment.CreatePaymentFlow{
 		Data: payment_flow.CreatePaymentFlowParams{

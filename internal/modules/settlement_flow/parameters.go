@@ -1,6 +1,6 @@
-package statement_flow
+package settlement_flow
 
-type CreateStatementParams struct {
+type CreateSettlementParams struct {
 	// 用户ID
 	UserID uint64 `in:"body" json:"userID,string" default:""`
 	// 名称

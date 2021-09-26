@@ -20,8 +20,8 @@ func (PromotionFlow) Indexes() github_com_eden_framework_sqlx_builder.Indexes {
 		"I_payment_flow_id": []string{
 			"PaymentFlowID",
 		},
-		"I_statement": []string{
-			"StatementsID",
+		"I_settlement": []string{
+			"SettlementID",
 		},
 		"I_user_id": []string{
 			"UserID",
@@ -50,7 +50,7 @@ func (PromotionFlow) Comments() map[string]string {
 		"PaymentFlowID":   "关联的支付流水",
 		"RefererID":       "奖励来源用户ID",
 		"RefererNickName": "奖励来源的用户昵称",
-		"StatementsID":    "关联的结算单ID",
+		"SettlementID":    "关联的结算单ID",
 		"UserID":          "获得奖励的用户ID",
 		"UserNickName":    "获得奖励的用户昵称",
 	}
@@ -94,7 +94,7 @@ func (PromotionFlow) ColDescriptions() map[string][]string {
 		"RefererNickName": []string{
 			"奖励来源的用户昵称",
 		},
-		"StatementsID": []string{
+		"SettlementID": []string{
 			"关联的结算单ID",
 		},
 		"UserID": []string{
@@ -170,12 +170,12 @@ func (m *PromotionFlow) FieldPaymentFlowID() *github_com_eden_framework_sqlx_bui
 	return PromotionFlowTable.F(m.FieldKeyPaymentFlowID())
 }
 
-func (PromotionFlow) FieldKeyStatementsID() string {
-	return "StatementsID"
+func (PromotionFlow) FieldKeySettlementID() string {
+	return "SettlementID"
 }
 
-func (m *PromotionFlow) FieldStatementsID() *github_com_eden_framework_sqlx_builder.Column {
-	return PromotionFlowTable.F(m.FieldKeyStatementsID())
+func (m *PromotionFlow) FieldSettlementID() *github_com_eden_framework_sqlx_builder.Column {
+	return PromotionFlowTable.F(m.FieldKeySettlementID())
 }
 
 func (PromotionFlow) FieldKeyCreatedAt() string {
@@ -212,7 +212,7 @@ func (m *PromotionFlow) IndexFieldNames() []string {
 		"FlowID",
 		"ID",
 		"PaymentFlowID",
-		"StatementsID",
+		"SettlementID",
 		"UserID",
 	}
 }
@@ -711,7 +711,7 @@ func (m *PromotionFlow) BatchFetchByPaymentFlowIDList(db github_com_eden_framewo
 
 }
 
-func (m *PromotionFlow) BatchFetchByStatementsIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]PromotionFlow, error) {
+func (m *PromotionFlow) BatchFetchBySettlementIDList(db github_com_eden_framework_sqlx.DBExecutor, values []uint64) ([]PromotionFlow, error) {
 
 	if len(values) == 0 {
 		return nil, nil
@@ -719,7 +719,7 @@ func (m *PromotionFlow) BatchFetchByStatementsIDList(db github_com_eden_framewor
 
 	table := db.T(m)
 
-	condition := table.F("StatementsID").In(values)
+	condition := table.F("SettlementID").In(values)
 
 	return m.List(db, condition)
 

@@ -10,7 +10,7 @@ import (
 // @def unique_index U_flow_id FlowID
 // @def index I_user_id UserID CreatedAt
 // @def index I_payment_flow_id PaymentFlowID
-// @def index I_statement StatementsID
+// @def index I_settlement SettlementID
 type PromotionFlow struct {
 	datatypes.PrimaryID
 	// 流水ID
@@ -28,7 +28,7 @@ type PromotionFlow struct {
 	// 关联的支付流水
 	PaymentFlowID uint64 `json:"paymentFlowID,string" db:"f_payment_flow_id,default='0'"`
 	// 关联的结算单ID
-	StatementsID uint64 `json:"statementsID,string" db:"f_statements_id,default='0'"`
+	SettlementID uint64 `json:"settlementID,string" db:"f_settlement_id,default='0'"`
 
 	datatypes.OperateTime
 }

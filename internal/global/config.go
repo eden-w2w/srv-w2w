@@ -1,12 +1,15 @@
 package global
 
 import (
+	"errors"
 	"fmt"
 	"github.com/eden-framework/courier/transport_grpc"
 	"github.com/eden-framework/courier/transport_http"
 	"github.com/eden-framework/eden-framework/pkg/client/mysql"
 	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
 	"github.com/sirupsen/logrus"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/eden-w2w/srv-w2w/internal/databases"
@@ -41,20 +44,58 @@ type Wechat struct {
 	EnableWechatPay bool
 }
 
-type StatementConfig struct {
+type SettlementConfig struct {
 	// 结算周期
-	StatementType enums.StatementType
+	SettlementType enums.SettlementType
 	// 结算节点 周：0-6，月：1-31
-	StatementDate uint8
+	SettlementDate uint8
+	// 提成比例规则
+	SettlementRules []SettlementRule
 }
 
-func (c StatementConfig) ToStatementCronRule() string {
-	if c.StatementType == enums.STATEMENT_TYPE__WEEK {
-		return fmt.Sprintf("0 0 0 * * %d", c.StatementDate)
-	} else if c.StatementType == enums.STATEMENT_TYPE__MONTH {
-		return fmt.Sprintf("0 0 0 %d * *", c.StatementDate)
+func (c SettlementConfig) ToSettlementCronRule() string {
+	if c.SettlementType == enums.SETTLEMENT_TYPE__WEEK {
+		return fmt.Sprintf("0 0 0 * * %d", c.SettlementDate)
+	} else if c.SettlementType == enums.SETTLEMENT_TYPE__MONTH {
+		return fmt.Sprintf("0 0 0 %d * *", c.SettlementDate)
 	}
 	return ""
+}
+
+type SettlementRule struct {
+	// 最小销售量（闭区间）
+	MinSales uint64
+	// 最大销售量（开区间）
+	MaxSales uint64
+	// 计提比例
+	Proportion float64
+}
+
+func (s SettlementRule) String() string {
+	str, _ := s.MarshalText()
+	return string(str)
+}
+
+func (s *SettlementRule) UnmarshalText(text []byte) (err error) {
+	strList := strings.Split(string(text), "|")
+	if len(strList) != 3 {
+		return errors.New("SettlementRule not support more than 3 args")
+	}
+	s.MinSales, err = strconv.ParseUint(strList[0], 10, 64)
+	if err != nil {
+		return
+	}
+	s.MaxSales, err = strconv.ParseUint(strList[1], 10, 64)
+	if err != nil {
+		return
+	}
+	s.Proportion, err = strconv.ParseFloat(strList[1], 64)
+	return
+}
+
+func (s SettlementRule) MarshalText() (text []byte, err error) {
+	str := fmt.Sprintf("%d|%d|%f", s.MinSales, s.MaxSales, s.Proportion)
+	return []byte(str), nil
 }
 
 var Config = struct {
@@ -79,7 +120,7 @@ var Config = struct {
 	// 支付流水默认超时时间
 	PaymentFlowExpireIn time.Duration
 
-	StatementConfig
+	SettlementConfig
 }{
 	LogLevel: logrus.DebugLevel,
 
@@ -102,8 +143,25 @@ var Config = struct {
 	},
 	OrderExpireIn:       30 * time.Minute,
 	PaymentFlowExpireIn: 5 * time.Minute,
-	StatementConfig: StatementConfig{
-		StatementType: enums.STATEMENT_TYPE__WEEK,
-		StatementDate: 1,
+	SettlementConfig: SettlementConfig{
+		SettlementType: enums.SETTLEMENT_TYPE__WEEK,
+		SettlementDate: 1,
+		SettlementRules: []SettlementRule{
+			{
+				MinSales:   0,
+				MaxSales:   500000,
+				Proportion: 0.1,
+			},
+			{
+				MinSales:   500000,
+				MaxSales:   5000000,
+				Proportion: 0.15,
+			},
+			{
+				MinSales:   5000000,
+				MaxSales:   ^uint64(0),
+				Proportion: 0.2,
+			},
+		},
 	},
 }

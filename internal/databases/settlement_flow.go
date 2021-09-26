@@ -5,15 +5,15 @@ import (
 	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
 )
 
-//go:generate eden generate model StatementsFlow --database Config.DB --with-comments
-//go:generate eden generate tag StatementsFlow --defaults=true
+//go:generate eden generate model SettlementFlow --database Config.DB --with-comments
+//go:generate eden generate tag SettlementFlow --defaults=true
 // @def primary ID
-// @def unique_index U_statements_id StatementsID
+// @def unique_index U_settlement_id SettlementID
 // @def unique_index U_interval UserID Name
-type StatementsFlow struct {
+type SettlementFlow struct {
 	datatypes.PrimaryID
 	// 结算单ID
-	StatementsID uint64 `json:"statementsID,string" db:"f_statements_id"`
+	SettlementID uint64 `json:"settlementID,string" db:"f_settlement_id"`
 	// 用户ID
 	UserID uint64 `json:"userID,string" db:"f_user_id"`
 	// 名称
@@ -25,7 +25,7 @@ type StatementsFlow struct {
 	// 结算金额
 	Amount uint64 `json:"amount" db:"f_amount"`
 	// 结算状态
-	Status enums.StatementStatus `json:"status" db:"f_status"`
+	Status enums.SettlementStatus `json:"status" db:"f_status"`
 
 	datatypes.OperateTime
 }

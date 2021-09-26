@@ -16,7 +16,7 @@ import (
 
 func testCreateOrder(t *testing.T) {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, middleware.AuthContextKey, userModel)
+	ctx = context.WithValue(ctx, middleware.AuthContextKey, orderUserModel)
 
 	request := orders.CreateOrder{
 		Data: order.CreateOrderParams{
@@ -48,7 +48,7 @@ func testCreateOrder(t *testing.T) {
 
 func testUpdateOrderStatusIncorrect(t *testing.T) {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, middleware.AuthContextKey, userModel)
+	ctx = context.WithValue(ctx, middleware.AuthContextKey, orderUserModel)
 
 	request := orders.TestUpdateOrderStatus{
 		OrderID: orderModel.OrderID,
@@ -60,7 +60,7 @@ func testUpdateOrderStatusIncorrect(t *testing.T) {
 
 func testUpdateOrderStatus(t *testing.T) {
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, middleware.AuthContextKey, userModel)
+	ctx = context.WithValue(ctx, middleware.AuthContextKey, orderUserModel)
 
 	request := orders.TestUpdateOrderStatus{
 		OrderID: orderModel.OrderID,
@@ -83,12 +83,12 @@ func testUpdateOrderStatus(t *testing.T) {
 	_, err = request.Output(ctx)
 	assert.Nil(t, err)
 
-	promotionFlows, err := promotion_flow.GetController().GetPromotionFlows(promotion_flow.GetPromotionFlowParams{
-		UserID: userModel.RefererID,
+	promotionFlowModel, err = promotion_flow.GetController().GetPromotionFlows(promotion_flow.GetPromotionFlowParams{
+		UserID: orderUserModel.RefererID,
 		Pagination: modules.Pagination{
 			Size: -1,
 		},
 	})
 	assert.Nil(t, err)
-	assert.Len(t, promotionFlows, 1)
+	assert.Len(t, promotionFlowModel, 1)
 }

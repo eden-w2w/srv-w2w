@@ -6,6 +6,7 @@ import (
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/goods"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/orders"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/payment"
+	"github.com/eden-w2w/srv-w2w/internal/routers/v0/promotion"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/users"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/wechat"
 )
@@ -29,4 +30,5 @@ func init() {
 	AuthRouter.Register(orders.Router)
 	AuthRouter.Register(users.Router)
 	AuthRouter.Register(payment.Router)
+	AuthRouter.Register(promotion.Router)
 }
