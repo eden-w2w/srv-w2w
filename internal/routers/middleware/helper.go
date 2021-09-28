@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/eden-w2w/srv-w2w/internal/databases"
+	"github.com/eden-w2w/lib-modules/databases"
 )
 
 const AuthContextKey = "Authorization"

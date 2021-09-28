@@ -3,8 +3,8 @@ package wechat
 import (
 	"context"
 	"fmt"
-	"github.com/eden-w2w/srv-w2w/internal/contants/errors"
-	"github.com/eden-w2w/srv-w2w/internal/databases"
+	errors "github.com/eden-w2w/lib-modules/constants/general_errors"
+	"github.com/eden-w2w/lib-modules/databases"
 	"github.com/eden-w2w/srv-w2w/internal/global"
 	w "github.com/silenceper/wechat/v2"
 	"github.com/silenceper/wechat/v2/cache"

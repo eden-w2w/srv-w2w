@@ -2,12 +2,12 @@ package test
 
 import (
 	"context"
-	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
-	"github.com/eden-w2w/srv-w2w/internal/contants/errors"
-	"github.com/eden-w2w/srv-w2w/internal/databases"
-	"github.com/eden-w2w/srv-w2w/internal/modules"
-	"github.com/eden-w2w/srv-w2w/internal/modules/order"
-	"github.com/eden-w2w/srv-w2w/internal/modules/promotion_flow"
+	"github.com/eden-w2w/lib-modules/constants/enums"
+	errors "github.com/eden-w2w/lib-modules/constants/general_errors"
+	"github.com/eden-w2w/lib-modules/databases"
+	"github.com/eden-w2w/lib-modules/modules"
+	"github.com/eden-w2w/lib-modules/modules/order"
+	"github.com/eden-w2w/lib-modules/modules/promotion_flow"
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/orders"
 	"github.com/stretchr/testify/assert"

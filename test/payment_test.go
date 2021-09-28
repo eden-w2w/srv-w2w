@@ -2,9 +2,9 @@ package test
 
 import (
 	"context"
-	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
+	"github.com/eden-w2w/lib-modules/constants/enums"
+	"github.com/eden-w2w/lib-modules/modules/payment_flow"
 	"github.com/eden-w2w/srv-w2w/internal/global"
-	"github.com/eden-w2w/srv-w2w/internal/modules/payment_flow"
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/payment"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/wechat"

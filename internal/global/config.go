@@ -1,27 +1,16 @@
 package global
 
 import (
-	"errors"
-	"fmt"
 	"github.com/eden-framework/courier/transport_grpc"
 	"github.com/eden-framework/courier/transport_http"
 	"github.com/eden-framework/eden-framework/pkg/client/mysql"
-	"github.com/eden-w2w/srv-w2w/internal/contants/enums"
+	"github.com/eden-w2w/lib-modules/constants/enums"
+	"github.com/eden-w2w/lib-modules/databases"
+	"github.com/eden-w2w/lib-modules/modules/id_generator"
+	"github.com/eden-w2w/lib-modules/modules/settlement_flow"
 	"github.com/sirupsen/logrus"
-	"strconv"
-	"strings"
 	"time"
-
-	"github.com/eden-w2w/srv-w2w/internal/databases"
 )
-
-type SnowflakeConfig struct {
-	Epoch      int64
-	BaseNodeID int64
-	NodeCount  int64
-	NodeBits   uint8
-	StepBits   uint8
-}
 
 type Wechat struct {
 	// 小程序AppID
@@ -44,60 +33,6 @@ type Wechat struct {
 	EnableWechatPay bool
 }
 
-type SettlementConfig struct {
-	// 结算周期
-	SettlementType enums.SettlementType
-	// 结算节点 周：0-6，月：1-31
-	SettlementDate uint8
-	// 提成比例规则
-	SettlementRules []SettlementRule
-}
-
-func (c SettlementConfig) ToSettlementCronRule() string {
-	if c.SettlementType == enums.SETTLEMENT_TYPE__WEEK {
-		return fmt.Sprintf("0 0 0 * * %d", c.SettlementDate)
-	} else if c.SettlementType == enums.SETTLEMENT_TYPE__MONTH {
-		return fmt.Sprintf("0 0 0 %d * *", c.SettlementDate)
-	}
-	return ""
-}
-
-type SettlementRule struct {
-	// 最小销售量（闭区间）
-	MinSales uint64
-	// 最大销售量（开区间）
-	MaxSales uint64
-	// 计提比例
-	Proportion float64
-}
-
-func (s SettlementRule) String() string {
-	str, _ := s.MarshalText()
-	return string(str)
-}
-
-func (s *SettlementRule) UnmarshalText(text []byte) (err error) {
-	strList := strings.Split(string(text), "|")
-	if len(strList) != 3 {
-		return errors.New("SettlementRule not support more than 3 args")
-	}
-	s.MinSales, err = strconv.ParseUint(strList[0], 10, 64)
-	if err != nil {
-		return
-	}
-	s.MaxSales, err = strconv.ParseUint(strList[1], 10, 64)
-	if err != nil {
-		return
-	}
-	s.Proportion, err = strconv.ParseFloat(strList[1], 64)
-	return
-}
-
-func (s SettlementRule) MarshalText() (text []byte, err error) {
-	str := fmt.Sprintf("%d|%d|%f", s.MinSales, s.MaxSales, s.Proportion)
-	return []byte(str), nil
-}
-
 var Config = struct {
 	LogLevel logrus.Level
 
@@ -110,7 +45,7 @@ var Config = struct {
 	HTTPServer *transport_http.ServeHTTP
 
 	// id generation
-	SnowflakeConfig
+	id_generator.SnowflakeConfig
 
 	// wechat config
 	Wechat
@@ -120,7 +55,7 @@ var Config = struct {
 	// 支付流水默认超时时间
 	PaymentFlowExpireIn time.Duration
 
-	SettlementConfig
+	settlement_flow.SettlementConfig
 }{
 	LogLevel: logrus.DebugLevel,
 
@@ -134,7 +69,7 @@ var Config = struct {
 		Port:     8800,
 		WithCORS: true,
 	},
-	SnowflakeConfig: SnowflakeConfig{
+	SnowflakeConfig: id_generator.SnowflakeConfig{
 		Epoch:      1288351723598,
 		BaseNodeID: 1,
 		NodeCount:  100,
@@ -143,10 +78,10 @@ var Config = struct {
 	},
 	OrderExpireIn:       30 * time.Minute,
 	PaymentFlowExpireIn: 5 * time.Minute,
-	SettlementConfig: SettlementConfig{
+	SettlementConfig: settlement_flow.SettlementConfig{
 		SettlementType: enums.SETTLEMENT_TYPE__WEEK,
 		SettlementDate: 1,
-		SettlementRules: []SettlementRule{
+		SettlementRules: []settlement_flow.SettlementRule{
 			{
 				MinSales:   0,
 				MaxSales:   500000,

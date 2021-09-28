@@ -1,10 +1,10 @@
 package test
 
 import (
-	"github.com/eden-w2w/srv-w2w/internal/databases"
+	"github.com/eden-w2w/lib-modules/databases"
+	"github.com/eden-w2w/lib-modules/modules/order"
+	"github.com/eden-w2w/lib-modules/modules/user"
 	"github.com/eden-w2w/srv-w2w/internal/global"
-	"github.com/eden-w2w/srv-w2w/internal/modules/order"
-	"github.com/eden-w2w/srv-w2w/internal/modules/user"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )

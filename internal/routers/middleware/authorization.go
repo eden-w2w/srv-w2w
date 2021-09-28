@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/eden-w2w/srv-w2w/internal/modules/user"
+	"github.com/eden-w2w/lib-modules/modules/user"
 )
 
 // Authorization 认证中间件
