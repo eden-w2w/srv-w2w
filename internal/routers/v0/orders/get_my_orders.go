@@ -31,7 +31,7 @@ func (req GetMyOrders) Output(ctx context.Context) (result interface{}, err erro
 	}
 
 	req.UserID = user.UserID
-	orders, err := order.GetController().GetOrders(req.GetOrdersParams)
+	orders, _, err := order.GetController().GetOrders(req.GetOrdersParams, false)
 	if err != nil {
 		return nil, err
 	}
