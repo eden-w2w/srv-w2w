@@ -77,11 +77,14 @@ func (req PaymentNotify) Output(ctx context.Context) (result interface{}, err er
 			}
 			// 联动订单
 			var orderModel *databases.Order
-			orderModel, err = order.GetController().GetOrder(paymentFlow.OrderID, paymentFlow.UserID, db, true)
+			var logistics *databases.OrderLogistics
+			orderModel, logistics, err = order.GetController().GetOrder(paymentFlow.OrderID, paymentFlow.UserID, db, true)
 			if err != nil {
 				return err
 			}
-			err = order.GetController().UpdateOrderStatusWithDB(db, orderModel, enums.ORDER_STATUS__PAID)
+			err = order.GetController().UpdateOrder(orderModel, logistics, order.UpdateOrderParams{
+				Status: enums.ORDER_STATUS__PAID,
+			}, db)
 		} else if tradeState.IsFail() {
 			err = payment_flow.GetController().UpdatePaymentFlowStatus(paymentFlow, enums.PAYMENT_STATUS__FAIL, trans, db)
 		}

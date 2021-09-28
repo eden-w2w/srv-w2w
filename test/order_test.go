@@ -20,12 +20,14 @@ func testCreateOrder(t *testing.T) {
 
 	request := orders.CreateOrder{
 		Data: order.CreateOrderParams{
-			TotalPrice:    12000,
-			PaymentMethod: enums.PAYMENT_METHOD__WECHAT,
-			Remark:        "这是单元测试订单",
-			Recipients:    "测试人员",
-			ShippingAddr:  "测试工厂",
-			Mobile:        "137********",
+			TotalPrice:     12000,
+			DiscountAmount: 0,
+			ActualAmount:   12000,
+			PaymentMethod:  enums.PAYMENT_METHOD__WECHAT,
+			Remark:         "这是单元测试订单",
+			Recipients:     "测试人员",
+			ShippingAddr:   "测试工厂",
+			Mobile:         "137********",
 			Goods: []order.CreateOrderGoodsParams{
 				{
 					GoodsID: 10001,
@@ -38,6 +40,14 @@ func testCreateOrder(t *testing.T) {
 	assert.Nil(t, err)
 	orderModel = orderResp.(*databases.Order)
 	assert.Equal(t, uint64(12000), orderModel.TotalPrice)
+	assert.Equal(t, uint64(0), orderModel.DiscountAmount)
+	assert.Equal(t, uint64(12000), orderModel.ActualAmount)
+
+	_, logisticsModel, err = order.GetController().GetOrder(orderModel.OrderID, orderModel.UserID, nil, false)
+	assert.Nil(t, err)
+	assert.Equal(t, "测试人员", logisticsModel.Recipients)
+	assert.Equal(t, "测试工厂", logisticsModel.ShippingAddr)
+	assert.Equal(t, "137********", logisticsModel.Mobile)
 
 	goods, err := order.GetController().GetOrderGoods(orderModel.OrderID)
 	assert.Nil(t, err)

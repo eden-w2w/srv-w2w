@@ -19,7 +19,6 @@ func testCreatePaymentFlow(t *testing.T) {
 	request := payment.CreatePaymentFlow{
 		Data: payment_flow.CreatePaymentFlowParams{
 			OrderID:       orderModel.OrderID,
-			Amount:        orderModel.TotalPrice,
 			PaymentMethod: enums.PAYMENT_METHOD__WECHAT,
 		},
 	}
@@ -28,7 +27,7 @@ func testCreatePaymentFlow(t *testing.T) {
 	response := resp.(payment_flow.CreatePaymentFlowResponse)
 	paymentFlowModel = response.PaymentFlow
 
-	assert.Equal(t, orderModel.TotalPrice, paymentFlowModel.Amount)
+	assert.Equal(t, orderModel.ActualAmount, paymentFlowModel.Amount)
 }
 
 func testPaymentNotifySuccess(t *testing.T) {

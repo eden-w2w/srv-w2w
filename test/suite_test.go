@@ -12,6 +12,7 @@ import (
 var orderUserModel *databases.User
 var promotionUserModel *databases.User
 var orderModel *databases.Order
+var logisticsModel *databases.OrderLogistics
 var paymentFlowModel *databases.PaymentFlow
 var promotionFlowModel []databases.PromotionFlow
 
@@ -47,6 +48,9 @@ func TestAll(t *testing.T) {
 	}
 	if orderModel != nil {
 		_ = orderModel.DeleteByOrderID(global.Config.MasterDB)
+	}
+	if logisticsModel != nil {
+		_ = logisticsModel.DeleteByLogisticsID(global.Config.MasterDB)
 	}
 	if paymentFlowModel != nil {
 		_ = paymentFlowModel.DeleteByFlowID(global.Config.MasterDB)

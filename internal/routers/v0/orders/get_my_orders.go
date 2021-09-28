@@ -45,14 +45,14 @@ func (req GetMyOrders) Output(ctx context.Context) (result interface{}, err erro
 			PaymentMethod: o.PaymentMethod,
 			Status:        o.Status,
 			CreatedAt:     o.CreatedAt,
-			Goods:         make([]order.OrderGoodsListResponse, 0),
+			Goods:         make([]order.GoodsListResponse, 0),
 		}
 		goods, err := order.GetController().GetOrderGoods(o.OrderID)
 		if err != nil {
 			return nil, err
 		}
 		for _, g := range goods {
-			orderResp.Goods = append(orderResp.Goods, order.OrderGoodsListResponse{
+			orderResp.Goods = append(orderResp.Goods, order.GoodsListResponse{
 				GoodsID:        g.GoodsID,
 				Name:           g.Name,
 				MainPicture:    g.MainPicture,

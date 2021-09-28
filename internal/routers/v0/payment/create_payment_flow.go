@@ -41,7 +41,7 @@ func (req CreatePaymentFlow) Output(ctx context.Context) (result interface{}, er
 
 	var o *databases.Order
 	tx = tx.With(func(db sqlx.DBExecutor) error {
-		model, err := order.GetController().GetOrder(req.Data.OrderID, user.UserID, db, true)
+		model, _, err := order.GetController().GetOrder(req.Data.OrderID, user.UserID, db, true)
 		if err != nil {
 			return err
 		}
@@ -52,7 +52,7 @@ func (req CreatePaymentFlow) Output(ctx context.Context) (result interface{}, er
 	var paymentFlow *databases.PaymentFlow
 	tx = tx.With(func(db sqlx.DBExecutor) error {
 		req.Data.UserID = user.UserID
-		req.Data.Amount = o.TotalPrice
+		req.Data.Amount = o.ActualAmount
 		paymentFlow, err = payment_flow.GetController().CreatePaymentFlow(req.Data, db)
 		return err
 	})
