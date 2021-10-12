@@ -10,7 +10,7 @@ import (
 	"github.com/eden-w2w/lib-modules/modules/promotion_flow"
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/orders"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -37,23 +37,23 @@ func testCreateOrder(t *testing.T) {
 		},
 	}
 	orderResp, err := request.Output(ctx)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	orderModel = orderResp.(*databases.Order)
-	assert.Equal(t, uint64(12000), orderModel.TotalPrice)
-	assert.Equal(t, uint64(0), orderModel.DiscountAmount)
-	assert.Equal(t, uint64(12000), orderModel.ActualAmount)
+	require.Equal(t, uint64(12000), orderModel.TotalPrice)
+	require.Equal(t, uint64(0), orderModel.DiscountAmount)
+	require.Equal(t, uint64(12000), orderModel.ActualAmount)
 
 	_, logisticsModel, err = order.GetController().GetOrder(orderModel.OrderID, orderModel.UserID, nil, false)
-	assert.Nil(t, err)
-	assert.Equal(t, "测试人员", logisticsModel.Recipients)
-	assert.Equal(t, "测试工厂", logisticsModel.ShippingAddr)
-	assert.Equal(t, "137********", logisticsModel.Mobile)
+	require.Nil(t, err)
+	require.Equal(t, "测试人员", logisticsModel.Recipients)
+	require.Equal(t, "测试工厂", logisticsModel.ShippingAddr)
+	require.Equal(t, "137********", logisticsModel.Mobile)
 
 	goods, err := order.GetController().GetOrderGoods(orderModel.OrderID)
-	assert.Nil(t, err)
-	assert.Len(t, goods, 1)
-	assert.Equal(t, uint64(10001), goods[0].GoodsID)
-	assert.Equal(t, uint32(1), goods[0].Amount)
+	require.Nil(t, err)
+	require.Len(t, goods, 1)
+	require.Equal(t, uint64(10001), goods[0].GoodsID)
+	require.Equal(t, uint32(1), goods[0].Amount)
 }
 
 func testUpdateOrderStatusIncorrect(t *testing.T) {
@@ -65,7 +65,7 @@ func testUpdateOrderStatusIncorrect(t *testing.T) {
 		Status:  enums.ORDER_STATUS__COMPLETE,
 	}
 	_, err := request.Output(ctx)
-	assert.Equal(t, errors.OrderStatusFlowIncorrect, err)
+	require.Equal(t, errors.OrderStatusFlowIncorrect, err)
 }
 
 func testUpdateOrderStatus(t *testing.T) {
@@ -77,21 +77,21 @@ func testUpdateOrderStatus(t *testing.T) {
 		Status:  enums.ORDER_STATUS__CONFIRM,
 	}
 	_, err := request.Output(ctx)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	request = orders.TestUpdateOrderStatus{
 		OrderID: orderModel.OrderID,
 		Status:  enums.ORDER_STATUS__DISPATCH,
 	}
 	_, err = request.Output(ctx)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	request = orders.TestUpdateOrderStatus{
 		OrderID: orderModel.OrderID,
 		Status:  enums.ORDER_STATUS__COMPLETE,
 	}
 	_, err = request.Output(ctx)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	promotionFlowModel, err = promotion_flow.GetController().GetPromotionFlows(promotion_flow.GetPromotionFlowParams{
 		UserID: orderUserModel.RefererID,
@@ -99,6 +99,6 @@ func testUpdateOrderStatus(t *testing.T) {
 			Size: -1,
 		},
 	})
-	assert.Nil(t, err)
-	assert.Len(t, promotionFlowModel, 1)
+	require.Nil(t, err)
+	require.Len(t, promotionFlowModel, 1)
 }

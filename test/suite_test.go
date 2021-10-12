@@ -5,7 +5,7 @@ import (
 	"github.com/eden-w2w/lib-modules/modules/order"
 	"github.com/eden-w2w/lib-modules/modules/user"
 	"github.com/eden-w2w/srv-w2w/internal/global"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -18,11 +18,11 @@ var promotionFlowModel []databases.PromotionFlow
 
 func TestAll(t *testing.T) {
 	u, err := user.GetController().GetUserByUserID(1441156099381141504, nil, false)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	orderUserModel = u
 
 	u, err = user.GetController().GetUserByUserID(1442548676592422912, nil, false)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	promotionUserModel = u
 
 	// 创建订单
@@ -42,7 +42,7 @@ func TestAll(t *testing.T) {
 
 	// 清理
 	goods, err := order.GetController().GetOrderGoods(orderModel.OrderID)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	for _, good := range goods {
 		_ = good.DeleteByOrderIDAndGoodsID(global.Config.MasterDB)
 	}

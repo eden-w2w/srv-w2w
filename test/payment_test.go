@@ -8,7 +8,7 @@ import (
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/payment"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/wechat"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -23,11 +23,11 @@ func testCreatePaymentFlow(t *testing.T) {
 		},
 	}
 	resp, err := request.Output(ctx)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	response := resp.(payment_flow.CreatePaymentFlowResponse)
 	paymentFlowModel = response.PaymentFlow
 
-	assert.Equal(t, orderModel.ActualAmount, paymentFlowModel.Amount)
+	require.Equal(t, orderModel.ActualAmount, paymentFlowModel.Amount)
 }
 
 func testPaymentNotifySuccess(t *testing.T) {
@@ -38,13 +38,13 @@ func testPaymentNotifySuccess(t *testing.T) {
 		TradeState: enums.WECHAT_TRADE_STATE__SUCCESS,
 	}
 	_, err := request.Output(ctx)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	err = paymentFlowModel.FetchByFlowID(global.Config.MasterDB)
-	assert.Nil(t, err)
-	assert.Equal(t, enums.PAYMENT_STATUS__SUCCESS, paymentFlowModel.Status)
+	require.Nil(t, err)
+	require.Equal(t, enums.PAYMENT_STATUS__SUCCESS, paymentFlowModel.Status)
 
 	err = orderModel.FetchByOrderID(global.Config.MasterDB)
-	assert.Nil(t, err)
-	assert.Equal(t, enums.ORDER_STATUS__PAID, orderModel.Status)
+	require.Nil(t, err)
+	require.Equal(t, enums.ORDER_STATUS__PAID, orderModel.Status)
 }
