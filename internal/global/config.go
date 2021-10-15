@@ -54,7 +54,7 @@ var Config = struct {
 	OrderExpireIn time.Duration
 	// 支付流水默认超时时间
 	PaymentFlowExpireIn time.Duration
-
+	// 结算配置
 	settlement_flow.SettlementConfig
 }{
 	LogLevel: logrus.DebugLevel,
@@ -98,5 +98,7 @@ var Config = struct {
 				Proportion: 0.2,
 			},
 		},
+		// 结算等待7天，可能涉及7天内退货
+		SettlementDuration: 7 * 24 * time.Hour,
 	},
 }

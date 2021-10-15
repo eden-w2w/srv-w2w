@@ -51,8 +51,7 @@ func runner(ctx *context.WaitStopContext) error {
 	order.GetController().Init(global.Config.MasterDB, global.Config.OrderExpireIn, events.NewOrderEvent())
 	payment_flow.GetController().Init(global.Config.MasterDB, global.Config.PaymentFlowExpireIn)
 	promotion_flow.GetController().Init(global.Config.MasterDB)
-	settlement_flow.GetController().Init(global.Config.MasterDB, global.Config.SettlementConfig)
-	go settlement_flow.GetController().StartTask()
+	settlement_flow.GetController().Init(global.Config.MasterDB, &global.Config.SettlementConfig)
 
 	go global.Config.GRPCServer.Serve(ctx, routers.Router)
 	return global.Config.HTTPServer.Serve(ctx, routers.Router)

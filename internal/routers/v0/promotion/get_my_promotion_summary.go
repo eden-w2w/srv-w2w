@@ -4,11 +4,14 @@ import (
 	"context"
 	"github.com/eden-framework/courier"
 	"github.com/eden-framework/courier/httpx"
+	"github.com/eden-framework/sqlx/datatypes"
 	errors "github.com/eden-w2w/lib-modules/constants/general_errors"
 	"github.com/eden-w2w/lib-modules/modules"
 	"github.com/eden-w2w/lib-modules/modules/promotion_flow"
 	"github.com/eden-w2w/lib-modules/modules/settlement_flow"
+	"github.com/eden-w2w/srv-w2w/internal/global"
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
+	"time"
 )
 
 func init() {
@@ -30,13 +33,14 @@ func (req GetMyPromotionSummary) Output(ctx context.Context) (result interface{}
 		return nil, errors.Unauthorized
 	}
 
-	flows, err := promotion_flow.GetController().GetPromotionFlows(promotion_flow.GetPromotionFlowParams{
+	flows, _, err := promotion_flow.GetController().GetPromotionFlows(promotion_flow.GetPromotionFlowParams{
 		UserID:          user.UserID,
-		IsNotSettlement: true,
+		IsNotSettlement: datatypes.BOOL_TRUE,
+		CreateLt:        datatypes.MySQLTimestamp(time.Now().Add(-global.Config.SettlementDuration)),
 		Pagination: modules.Pagination{
 			Size: -1,
 		},
-	})
+	}, false)
 	if err != nil {
 		return nil, err
 	}
