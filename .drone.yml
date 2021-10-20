@@ -52,7 +52,7 @@ steps:
   - name: docker
     path: /var/run/docker.sock
 - name: master_deploy
-  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:2.4.3
+  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-ondeploy:1.0
   commands:
   - eden ci deploy --env=PROD
   environment:
