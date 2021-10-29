@@ -47,7 +47,7 @@ func (req GetMyOrders) Output(ctx context.Context) (result interface{}, err erro
 			CreatedAt:     o.CreatedAt,
 			Goods:         make([]order.GoodsListResponse, 0),
 		}
-		goods, err := order.GetController().GetOrderGoods(o.OrderID)
+		goods, err := order.GetController().GetOrderGoods(o.OrderID, nil)
 		if err != nil {
 			return nil, err
 		}

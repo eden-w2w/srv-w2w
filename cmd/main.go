@@ -48,7 +48,7 @@ func runner(ctx *context.WaitStopContext) error {
 	user.GetController().Init(global.Config.MasterDB)
 	wechat.GetController()
 	goods.GetController().Init(global.Config.MasterDB)
-	order.GetController().Init(global.Config.MasterDB, global.Config.OrderExpireIn, events.NewOrderEvent())
+	order.GetController().Init(global.Config.MasterDB, global.Config.OrderExpireIn, "", nil, events.NewOrderEvent())
 	payment_flow.GetController().Init(global.Config.MasterDB, global.Config.PaymentFlowExpireIn)
 	promotion_flow.GetController().Init(global.Config.MasterDB)
 	settlement_flow.GetController().Init(global.Config.MasterDB, &global.Config.SettlementConfig)

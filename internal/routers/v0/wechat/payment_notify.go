@@ -9,6 +9,7 @@ import (
 	"github.com/eden-w2w/lib-modules/constants/enums"
 	errors "github.com/eden-w2w/lib-modules/constants/general_errors"
 	"github.com/eden-w2w/lib-modules/databases"
+	"github.com/eden-w2w/lib-modules/modules/goods"
 	"github.com/eden-w2w/lib-modules/modules/order"
 	"github.com/eden-w2w/lib-modules/modules/payment_flow"
 	"github.com/eden-w2w/srv-w2w/internal/global"
@@ -82,9 +83,13 @@ func (req PaymentNotify) Output(ctx context.Context) (result interface{}, err er
 			if err != nil {
 				return err
 			}
-			err = order.GetController().UpdateOrder(orderModel, logistics, order.UpdateOrderParams{
+			orderGoods, err := order.GetController().GetOrderGoods(paymentFlow.OrderID, db)
+			if err != nil {
+				return err
+			}
+			err = order.GetController().UpdateOrder(orderModel, logistics, orderGoods, order.UpdateOrderParams{
 				Status: enums.ORDER_STATUS__PAID,
-			}, db)
+			}, goods.GetController().LockInventory, goods.GetController().UnlockInventory, db)
 		} else if tradeState.IsFail() {
 			err = payment_flow.GetController().UpdatePaymentFlowStatus(paymentFlow, enums.PAYMENT_STATUS__FAIL, trans, db)
 		}

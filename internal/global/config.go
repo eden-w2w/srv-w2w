@@ -4,6 +4,7 @@ import (
 	"github.com/eden-framework/courier/transport_grpc"
 	"github.com/eden-framework/courier/transport_http"
 	"github.com/eden-framework/eden-framework/pkg/client/mysql"
+	"github.com/eden-w2w/lib-modules/clients/gaode"
 	"github.com/eden-w2w/lib-modules/constants/enums"
 	"github.com/eden-w2w/lib-modules/databases"
 	"github.com/eden-w2w/lib-modules/modules/id_generator"
@@ -56,6 +57,8 @@ var Config = struct {
 	PaymentFlowExpireIn time.Duration
 	// 结算配置
 	settlement_flow.SettlementConfig
+
+	ClientGaode *gaode.GaodeClient
 }{
 	LogLevel: logrus.DebugLevel,
 
@@ -101,4 +104,5 @@ var Config = struct {
 		// 结算等待7天，可能涉及7天内退货
 		SettlementDuration: 7 * 24 * time.Hour,
 	},
+	ClientGaode: &gaode.GaodeClient{},
 }
