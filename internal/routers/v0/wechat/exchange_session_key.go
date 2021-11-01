@@ -33,6 +33,12 @@ func (req ExchangeSessionKey) Output(ctx context.Context) (result interface{}, e
 	userCtrl := user.GetController()
 	u, dbErr := userCtrl.GetUserByOpenID(sessionResp.OpenID)
 	if u != nil {
+		err = userCtrl.UpdateUserInfo(u.UserID, user.UpdateUserInfoParams{
+			SessionKey: sessionResp.SessionKey,
+		})
+		if err != nil {
+			return nil, err
+		}
 		// 刷新token并返回用户信息实体
 		return userCtrl.RefreshToken(u.UserID)
 	} else {

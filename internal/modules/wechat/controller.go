@@ -11,6 +11,7 @@ import (
 	"github.com/silenceper/wechat/v2/miniprogram"
 	"github.com/silenceper/wechat/v2/miniprogram/auth"
 	programConfig "github.com/silenceper/wechat/v2/miniprogram/config"
+	"github.com/silenceper/wechat/v2/miniprogram/encryptor"
 	"github.com/silenceper/wechat/v2/miniprogram/qrcode"
 	"github.com/sirupsen/logrus"
 	"github.com/wechatpay-apiv3/wechatpay-go/core"
@@ -96,6 +97,16 @@ func (c Controller) Code2Session(code string) (*auth.ResCode2Session, error) {
 	return &resp, nil
 }
 
+func (c Controller) ExchangeEncryptedData(sessionKey string, params WechatUserInfo) (*encryptor.PlainData, error) {
+	plain, err := c.program.GetEncryptor().Decrypt(sessionKey, params.EncryptedData, params.IV)
+	if err != nil {
+		logrus.Errorf("[ExchangeEncryptedData] program.GetEncryptor().Decrypt err: %v, sessionKey: %s, params: %+v", err, sessionKey, params)
+		return nil, errors.InternalError
+	}
+
+	return plain, nil
+}
+
 func (c Controller) GetUnlimitedQrCode(params qrcode.QRCoder) (buffer []byte, err error) {
 	buffer, err = c.program.GetQRCode().GetWXACodeUnlimit(params)
 	if err != nil {
@@ -108,6 +119,9 @@ func (c Controller) GetUnlimitedQrCode(params qrcode.QRCoder) (buffer []byte, er
 
 func (c Controller) CreatePrePayment(ctx context.Context, order *databases.Order, flow *databases.PaymentFlow, payer *databases.User) (resp *jsapi.PrepayWithRequestPaymentResponse, err error) {
 	if c.payClient == nil {
+		return
+	}
+	if !global.Config.EnableWechatPay {
 		return
 	}
 	service := jsapi.JsapiApiService{

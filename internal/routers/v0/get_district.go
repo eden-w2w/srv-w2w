@@ -14,7 +14,7 @@ func init() {
 	Router.Register(courier.NewRouter(GetDistricts{}))
 }
 
-// GetDistricts
+// GetDistricts 获取省市行政区
 type GetDistricts struct {
 	httpx.MethodGet
 
