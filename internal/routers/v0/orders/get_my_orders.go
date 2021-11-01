@@ -55,8 +55,10 @@ func (req GetMyOrders) Output(ctx context.Context) (result interface{}, err erro
 			orderResp.Goods = append(orderResp.Goods, order.GoodsListResponse{
 				GoodsID:        g.GoodsID,
 				Name:           g.Name,
+				Comment:        g.Comment,
 				MainPicture:    g.MainPicture,
 				Specifications: g.Specifications,
+				Activities:     g.Activities,
 				Price:          g.Price,
 				Amount:         g.Amount,
 			})
