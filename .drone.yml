@@ -7,20 +7,6 @@ volumes:
   host:
     path: /var/run/docker.sock
 steps:
-- name: master_test
-  image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
-  commands:
-  - eden ci run test
-  environment:
-    GOENV: PROD
-  when:
-    branch:
-      include:
-      - master
-      exclude: []
-  volumes:
-  - name: temp
-    path: /go
 - name: master_build
   image: registry-vpc.cn-hangzhou.aliyuncs.com/profzone/golang-onbuild:1.14
   commands:
