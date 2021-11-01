@@ -9,7 +9,7 @@ require (
 	github.com/eden-framework/courier v1.0.5
 	github.com/eden-framework/eden-framework v1.2.6-0.20211020014935-eab59ae7d198
 	github.com/eden-framework/sqlx v0.0.1
-	github.com/eden-w2w/lib-modules v0.0.9-0.20211031065607-e0a592e8aa80
+	github.com/eden-w2w/lib-modules v0.0.9-0.20211101075122-0ec9225b1b6d
 	github.com/mozillazg/go-pinyin v0.18.0 // indirect
 	github.com/silenceper/wechat/v2 v2.0.9
 	github.com/sirupsen/logrus v1.8.1
