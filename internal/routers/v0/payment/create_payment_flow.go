@@ -82,11 +82,7 @@ func (req CreatePaymentFlow) Output(ctx context.Context) (result interface{}, er
 				if err != nil {
 					return nil
 				}
-				err = wechatModule.UpdatePaymentByWechat(tran, db)
-				if err != nil {
-					return nil
-				}
-				return errors.LastPaymentCloseConflict
+				_ = wechatModule.UpdatePaymentByWechat(tran, db)
 			}
 			return nil
 		},
