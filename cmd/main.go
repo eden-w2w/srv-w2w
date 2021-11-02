@@ -12,7 +12,7 @@ import (
 	"github.com/eden-w2w/lib-modules/modules/promotion_flow"
 	"github.com/eden-w2w/lib-modules/modules/settlement_flow"
 	"github.com/eden-w2w/lib-modules/modules/user"
-	"github.com/eden-w2w/srv-w2w/internal/modules/wechat"
+	"github.com/eden-w2w/lib-modules/modules/wechat"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -43,15 +43,7 @@ func main() {
 }
 
 func runner(ctx *context.WaitStopContext) error {
-	logrus.SetLevel(global.Config.LogLevel)
-	id_generator.GetGenerator().Init(global.Config.SnowflakeConfig)
-	user.GetController().Init(global.Config.MasterDB)
-	wechat.GetController()
-	goods.GetController().Init(global.Config.MasterDB)
-	order.GetController().Init(global.Config.MasterDB, global.Config.OrderExpireIn, "", nil, events.NewOrderEvent())
-	payment_flow.GetController().Init(global.Config.MasterDB, global.Config.PaymentFlowExpireIn)
-	promotion_flow.GetController().Init(global.Config.MasterDB)
-	settlement_flow.GetController().Init(global.Config.MasterDB, &global.Config.SettlementConfig)
+	initModules()
 
 	go global.Config.GRPCServer.Serve(ctx, routers.Router)
 	return global.Config.HTTPServer.Serve(ctx, routers.Router)
@@ -61,4 +53,16 @@ func migrate(opts *migration.MigrationOpts) {
 	if err := migration.Migrate(global.Config.MasterDB, opts); err != nil {
 		panic(err)
 	}
+}
+
+func initModules() {
+	logrus.SetLevel(global.Config.LogLevel)
+	id_generator.GetGenerator().Init(global.Config.SnowflakeConfig)
+	user.GetController().Init(global.Config.MasterDB)
+	wechat.GetController().Init(global.Config.Wechat)
+	goods.GetController().Init(global.Config.MasterDB)
+	order.GetController().Init(global.Config.MasterDB, global.Config.OrderExpireIn, events.NewOrderEvent())
+	payment_flow.GetController().Init(global.Config.MasterDB, global.Config.PaymentFlowExpireIn)
+	promotion_flow.GetController().Init(global.Config.MasterDB)
+	settlement_flow.GetController().Init(global.Config.MasterDB, global.Config.SettlementConfig)
 }

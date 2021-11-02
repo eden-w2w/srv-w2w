@@ -5,34 +5,13 @@ import (
 	"github.com/eden-framework/courier/transport_http"
 	"github.com/eden-framework/eden-framework/pkg/client/mysql"
 	"github.com/eden-w2w/lib-modules/clients/gaode"
-	"github.com/eden-w2w/lib-modules/constants/enums"
 	"github.com/eden-w2w/lib-modules/databases"
 	"github.com/eden-w2w/lib-modules/modules/id_generator"
 	"github.com/eden-w2w/lib-modules/modules/settlement_flow"
+	"github.com/eden-w2w/lib-modules/modules/wechat"
 	"github.com/sirupsen/logrus"
 	"time"
 )
-
-type Wechat struct {
-	// 小程序AppID
-	AppID string
-	// 小程序AppSecret
-	AppSecret string
-	// 微信商户ID
-	MerchantID string
-	// 微信商户证书序列号
-	MerchantCertSerialNo string
-	// 微信商户证书私钥
-	MerchantPK string
-	// 微信商户APIv3密钥
-	MerchantSecret string
-	// 微信支付商品描述
-	ProductionDesc string
-	// 微信支付回调地址
-	NotifyUrl string
-	// 启用微信支付
-	EnableWechatPay bool
-}
 
 var Config = struct {
 	LogLevel logrus.Level
@@ -49,7 +28,7 @@ var Config = struct {
 	id_generator.SnowflakeConfig
 
 	// wechat config
-	Wechat
+	Wechat wechat.Wechat
 
 	// 订单超时时间
 	OrderExpireIn time.Duration
@@ -82,8 +61,6 @@ var Config = struct {
 	OrderExpireIn:       30 * time.Minute,
 	PaymentFlowExpireIn: 5 * time.Minute,
 	SettlementConfig: settlement_flow.SettlementConfig{
-		SettlementType: enums.SETTLEMENT_TYPE__WEEK,
-		SettlementDate: 1,
 		SettlementRules: []settlement_flow.SettlementRule{
 			{
 				MinSales:   0,

@@ -1,4 +1,4 @@
-package general_errors
+package errors
 
 import (
 	"net/http"
@@ -27,6 +27,8 @@ const (
 const (
 	// @errTalk 操作冲突
 	Conflict status_error.StatusErrorCode = http.StatusConflict*1e6 + ServiceStatusErrorCode + iota
+	// @errTalk 上一笔支付单据异常关闭，请返回查看订单状态，避免重复支付
+	LastPaymentCloseConflict
 )
 
 const (

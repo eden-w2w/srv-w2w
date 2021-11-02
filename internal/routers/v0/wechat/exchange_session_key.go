@@ -6,7 +6,7 @@ import (
 	"github.com/eden-framework/courier/httpx"
 	errors "github.com/eden-w2w/lib-modules/constants/general_errors"
 	"github.com/eden-w2w/lib-modules/modules/user"
-	"github.com/eden-w2w/srv-w2w/internal/modules/wechat"
+	"github.com/eden-w2w/lib-modules/modules/wechat"
 )
 
 func init() {

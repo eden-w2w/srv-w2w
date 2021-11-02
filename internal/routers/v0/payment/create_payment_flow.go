@@ -2,17 +2,21 @@ package payment
 
 import (
 	"context"
+	"fmt"
 	"github.com/eden-framework/courier"
 	"github.com/eden-framework/courier/httpx"
 	"github.com/eden-framework/sqlx"
-	errors "github.com/eden-w2w/lib-modules/constants/general_errors"
+	"github.com/eden-w2w/lib-modules/constants/enums"
 	"github.com/eden-w2w/lib-modules/databases"
 	"github.com/eden-w2w/lib-modules/modules/order"
 	"github.com/eden-w2w/lib-modules/modules/payment_flow"
+	"github.com/eden-w2w/lib-modules/modules/wechat"
+	"github.com/eden-w2w/srv-w2w/internal/constants/errors"
 	"github.com/eden-w2w/srv-w2w/internal/global"
-	"github.com/eden-w2w/srv-w2w/internal/modules/wechat"
+	wechatModule "github.com/eden-w2w/srv-w2w/internal/modules/wechat"
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
 	"github.com/sirupsen/logrus"
+	"github.com/wechatpay-apiv3/wechatpay-go/core"
 	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/jsapi"
 )
 
@@ -40,44 +44,92 @@ func (req CreatePaymentFlow) Output(ctx context.Context) (result interface{}, er
 	tx := sqlx.NewTasks(global.Config.MasterDB)
 
 	var o *databases.Order
-	tx = tx.With(func(db sqlx.DBExecutor) error {
-		model, _, err := order.GetController().GetOrder(req.Data.OrderID, user.UserID, db, true)
-		if err != nil {
-			return err
-		}
-		o = model
-		return nil
-	})
+	var retErr error
+	tx = tx.With(
+		func(db sqlx.DBExecutor) error {
+			model, _, err := order.GetController().GetOrder(req.Data.OrderID, user.UserID, db, true)
+			if err != nil {
+				return err
+			}
+			o = model
+
+			flows, err := payment_flow.GetController().GetFlowByOrderIDAndStatus(
+				o.OrderID,
+				user.UserID,
+				[]enums.PaymentStatus{enums.PAYMENT_STATUS__CREATED, enums.PAYMENT_STATUS__PROCESS},
+				db,
+			)
+			if err != nil {
+				return err
+			}
+			for _, flow := range flows {
+				err = wechat.GetController().CloseOrder(
+					jsapi.CloseOrderRequest{
+						OutTradeNo: core.String(fmt.Sprintf("%d", flow.FlowID)),
+						Mchid:      core.String(global.Config.Wechat.MerchantID),
+					},
+				)
+				if err != nil {
+					return errors.LastPaymentCloseConflict
+				}
+				// 查单并更新支付单状态
+				tran, err := wechat.GetController().QueryOrderByOutTradeNo(
+					jsapi.QueryOrderByOutTradeNoRequest{
+						OutTradeNo: core.String(fmt.Sprintf("%d", flow.FlowID)),
+						Mchid:      core.String(global.Config.Wechat.MerchantID),
+					},
+				)
+				if err != nil {
+					return nil
+				}
+				err = wechatModule.UpdatePaymentByWechat(tran, db)
+				if err != nil {
+					return nil
+				}
+				return errors.LastPaymentCloseConflict
+			}
+			return nil
+		},
+	)
 
 	var paymentFlow *databases.PaymentFlow
-	tx = tx.With(func(db sqlx.DBExecutor) error {
-		req.Data.UserID = user.UserID
-		req.Data.Amount = o.ActualAmount
-		paymentFlow, err = payment_flow.GetController().CreatePaymentFlow(req.Data, db)
-		return err
-	})
+	tx = tx.With(
+		func(db sqlx.DBExecutor) error {
+			req.Data.UserID = user.UserID
+			req.Data.Amount = o.ActualAmount
+			paymentFlow, err = payment_flow.GetController().CreatePaymentFlow(req.Data, db)
+			return err
+		},
+	)
 
 	var wechatResp *jsapi.PrepayWithRequestPaymentResponse
-	tx = tx.With(func(_ sqlx.DBExecutor) error {
-		resp, err := wechat.GetController().CreatePrePayment(ctx, o, paymentFlow, user)
-		if err != nil {
-			return err
-		}
-		wechatResp = resp
-		return nil
-	})
-
-	tx = tx.With(func(db sqlx.DBExecutor) error {
-		if wechatResp == nil {
+	tx = tx.With(
+		func(_ sqlx.DBExecutor) error {
+			resp, err := wechat.GetController().CreatePrePayment(ctx, o, paymentFlow, user)
+			if err != nil {
+				return err
+			}
+			wechatResp = resp
 			return nil
-		}
-		return payment_flow.GetController().UpdatePaymentFlowRemoteID(paymentFlow.FlowID, *wechatResp.PrepayId, db)
-	})
+		},
+	)
+
+	tx = tx.With(
+		func(db sqlx.DBExecutor) error {
+			if wechatResp == nil {
+				return nil
+			}
+			return payment_flow.GetController().UpdatePaymentFlowRemoteID(paymentFlow.FlowID, *wechatResp.PrepayId, db)
+		},
+	)
 
 	err = tx.Do()
 	if err != nil {
 		logrus.Errorf("[CreatePaymentFlow] tx.Do() err: %v, params: %+v", err, req.Data)
 		return
+	}
+	if retErr != nil {
+		return nil, retErr
 	}
 	return payment_flow.CreatePaymentFlowResponse{
 		PaymentFlow:  paymentFlow,
