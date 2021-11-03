@@ -24,16 +24,20 @@ import (
 var cmdMigrationDryRun bool
 
 func main() {
-	app := application.NewApplication(runner, false,
+	app := application.NewApplication(
+		runner, false,
 		application.WithConfig(&global.Config),
-		application.WithConfig(&databases.Config))
+		application.WithConfig(&databases.Config),
+	)
 
 	cmdMigrate := &cobra.Command{
 		Use: "migrate",
 		Run: func(cmd *cobra.Command, args []string) {
-			migrate(&migration.MigrationOpts{
-				DryRun: cmdMigrationDryRun,
-			})
+			migrate(
+				&migration.MigrationOpts{
+					DryRun: cmdMigrationDryRun,
+				},
+			)
 		},
 	}
 	cmdMigrate.Flags().BoolVarP(&cmdMigrationDryRun, "dry", "d", false, "migrate --dry")
@@ -61,7 +65,11 @@ func initModules() {
 	user.GetController().Init(global.Config.MasterDB)
 	wechat.GetController().Init(global.Config.Wechat)
 	goods.GetController().Init(global.Config.MasterDB)
-	order.GetController().Init(global.Config.MasterDB, global.Config.OrderExpireIn, events.NewOrderEvent())
+	order.GetController().Init(
+		global.Config.MasterDB,
+		global.Config.OrderExpireIn,
+		events.NewOrderEvent(global.Config.Wechat.MerchantID),
+	)
 	payment_flow.GetController().Init(global.Config.MasterDB, global.Config.PaymentFlowExpireIn)
 	promotion_flow.GetController().Init(global.Config.MasterDB)
 	settlement_flow.GetController().Init(global.Config.MasterDB, global.Config.SettlementConfig)
