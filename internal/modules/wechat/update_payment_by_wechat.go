@@ -90,6 +90,5 @@ func UpdatePaymentByWechat(tran *payments.Transaction, db sqlx.DBExecutor) error
 			return err
 		}
 	}
-
-	return nil
+	return payment_flow.GetController().UpdatePaymentFlowRemoteID(paymentFlow.FlowID, *tran.TransactionId, db)
 }
