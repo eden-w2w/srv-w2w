@@ -8,15 +8,19 @@ import (
 	"github.com/eden-w2w/lib-modules/modules/goods"
 	"github.com/eden-w2w/lib-modules/modules/order"
 	"github.com/eden-w2w/lib-modules/modules/payment_flow"
+	"github.com/eden-w2w/wechatpay-go/services/payments"
 	"github.com/sirupsen/logrus"
-	"github.com/wechatpay-apiv3/wechatpay-go/services/payments"
 	"strconv"
 )
 
 func UpdatePaymentByWechat(tran *payments.Transaction, db sqlx.DBExecutor) error {
 	tradeState, err := enums.ParseWechatTradeStateFromString(*tran.TradeState)
 	if err != nil {
-		logrus.Errorf("[PaymentNotify] enums.ParseWechatTradeStateFromString err: %v, TradeState: %s", err, *tran.TradeState)
+		logrus.Errorf(
+			"[PaymentNotify] enums.ParseWechatTradeStateFromString err: %v, TradeState: %s",
+			err,
+			*tran.TradeState,
+		)
 		return err
 	}
 	if !tradeState.IsEnding() {
@@ -46,6 +50,24 @@ func UpdatePaymentByWechat(tran *payments.Transaction, db sqlx.DBExecutor) error
 		return nil
 	}
 	if tradeState.IsSuccess() {
+		// 检查代金券信息
+		var discountAmount, actualAmount = uint64(0), uint64(0)
+		if len(tran.PromotionDetail) > 0 {
+			for _, detail := range tran.PromotionDetail {
+				discountAmount += uint64(*detail.Amount)
+			}
+			actualAmount = paymentFlow.Amount - discountAmount
+			err = payment_flow.GetController().UpdatePaymentFlowAmount(
+				paymentFlow.FlowID,
+				discountAmount,
+				actualAmount,
+				db,
+			)
+			if err != nil {
+				return err
+			}
+		}
+
 		err = payment_flow.GetController().UpdatePaymentFlowStatus(
 			paymentFlow,
 			enums.PAYMENT_STATUS__SUCCESS,
@@ -71,10 +93,21 @@ func UpdatePaymentByWechat(tran *payments.Transaction, db sqlx.DBExecutor) error
 		if err != nil {
 			return err
 		}
+
+		updateParams := order.UpdateOrderParams{
+			Status: enums.ORDER_STATUS__PAID,
+		}
+		if len(tran.PromotionDetail) > 0 {
+			updateParams.DiscountAmount = discountAmount
+		}
 		err = order.GetController().UpdateOrder(
-			orderModel, logistics, orderGoods, order.UpdateOrderParams{
-				Status: enums.ORDER_STATUS__PAID,
-			}, goods.GetController().LockInventory, goods.GetController().UnlockInventory, db,
+			orderModel,
+			logistics,
+			orderGoods,
+			updateParams,
+			goods.GetController().LockInventory,
+			goods.GetController().UnlockInventory,
+			db,
 		)
 		if err != nil {
 			return err

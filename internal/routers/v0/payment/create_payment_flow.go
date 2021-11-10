@@ -15,9 +15,9 @@ import (
 	"github.com/eden-w2w/srv-w2w/internal/global"
 	wechatModule "github.com/eden-w2w/srv-w2w/internal/modules/wechat"
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
+	"github.com/eden-w2w/wechatpay-go/core"
+	"github.com/eden-w2w/wechatpay-go/services/payments/jsapi"
 	"github.com/sirupsen/logrus"
-	"github.com/wechatpay-apiv3/wechatpay-go/core"
-	"github.com/wechatpay-apiv3/wechatpay-go/services/payments/jsapi"
 )
 
 func init() {
@@ -70,19 +70,19 @@ func (req CreatePaymentFlow) Output(ctx context.Context) (result interface{}, er
 					},
 				)
 				if err != nil {
+					// 查单并更新支付单状态
+					tran, err := wechat.GetController().QueryOrderByOutTradeNo(
+						jsapi.QueryOrderByOutTradeNoRequest{
+							OutTradeNo: core.String(fmt.Sprintf("%d", flow.FlowID)),
+							Mchid:      core.String(global.Config.Wechat.MerchantID),
+						},
+					)
+					if err != nil {
+						return errors.LastPaymentCloseConflict
+					}
+					_ = wechatModule.UpdatePaymentByWechat(tran, nil)
 					return errors.LastPaymentCloseConflict
 				}
-				// 查单并更新支付单状态
-				tran, err := wechat.GetController().QueryOrderByOutTradeNo(
-					jsapi.QueryOrderByOutTradeNoRequest{
-						OutTradeNo: core.String(fmt.Sprintf("%d", flow.FlowID)),
-						Mchid:      core.String(global.Config.Wechat.MerchantID),
-					},
-				)
-				if err != nil {
-					return nil
-				}
-				_ = wechatModule.UpdatePaymentByWechat(tran, db)
 			}
 			return nil
 		},
