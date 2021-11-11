@@ -9,12 +9,11 @@ require (
 	github.com/eden-framework/courier v1.0.5
 	github.com/eden-framework/eden-framework v1.2.6-0.20211020014935-eab59ae7d198
 	github.com/eden-framework/sqlx v0.0.1
-	github.com/eden-w2w/lib-modules v0.1.4-0.20211111021405-bf96c71da41f
-	github.com/eden-w2w/wechatpay-go v0.2.11
+	github.com/eden-w2w/lib-modules v0.1.4
+	github.com/eden-w2w/wechatpay-go v0.2.12-0.20211111092745-2fb11eb5e8dc
 	github.com/mozillazg/go-pinyin v0.18.0
 	github.com/silenceper/wechat/v2 v2.0.9
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v0.0.5
 	github.com/stretchr/testify v1.7.0
-	github.com/wechatpay-apiv3/wechatpay-go v0.2.7 // indirect
 )
