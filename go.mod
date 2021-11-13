@@ -2,10 +2,7 @@ module github.com/eden-w2w/srv-w2w
 
 go 1.16
 
-replace (
-	github.com/eden-w2w/lib-modules => ../lib-modules
-	k8s.io/client-go => k8s.io/client-go v0.18.8
-)
+replace k8s.io/client-go => k8s.io/client-go v0.18.8
 
 require (
 	github.com/eden-framework/context v0.0.2
