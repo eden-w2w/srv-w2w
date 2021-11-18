@@ -5,7 +5,6 @@ import (
 	"github.com/eden-framework/courier"
 	"github.com/eden-framework/courier/httpx"
 	errors "github.com/eden-w2w/lib-modules/constants/general_errors"
-	"github.com/eden-w2w/lib-modules/modules/goods"
 	"github.com/eden-w2w/lib-modules/modules/order"
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
 )
@@ -31,6 +30,6 @@ func (req CancelOrder) Output(ctx context.Context) (result interface{}, err erro
 		return nil, errors.Unauthorized
 	}
 
-	err = order.GetController().CancelOrder(req.OrderID, user.UserID, goods.GetController().UnlockInventory)
+	err = order.GetController().CancelOrder(req.OrderID, user.UserID)
 	return
 }

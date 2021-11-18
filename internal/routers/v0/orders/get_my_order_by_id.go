@@ -60,14 +60,17 @@ func (req GetMyOrderByID) Output(ctx context.Context) (result interface{}, err e
 		return nil, err
 	}
 	for _, g := range goods {
-		response.Goods = append(response.Goods, order.GoodsListResponse{
-			GoodsID:        g.GoodsID,
-			Name:           g.Name,
-			MainPicture:    g.MainPicture,
-			Specifications: g.Specifications,
-			Price:          g.Price,
-			Amount:         g.Amount,
-		})
+		response.Goods = append(
+			response.Goods, order.GoodsListResponse{
+				GoodsID:        g.GoodsID,
+				Name:           g.Name,
+				MainPicture:    g.MainPicture,
+				Specifications: g.Specifications,
+				Price:          g.Price,
+				Amount:         g.Amount,
+				IsBooking:      g.IsBooking,
+			},
+		)
 	}
 	return response, nil
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/eden-framework/courier"
 	"github.com/eden-framework/courier/httpx"
 	errors "github.com/eden-w2w/lib-modules/constants/general_errors"
-	"github.com/eden-w2w/lib-modules/modules/goods"
 	"github.com/eden-w2w/lib-modules/modules/order"
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
 )
@@ -31,5 +30,5 @@ func (req CreateOrder) Output(ctx context.Context) (result interface{}, err erro
 	}
 
 	req.Data.UserID = user.UserID
-	return order.GetController().CreateOrder(req.Data, goods.GetController().LockInventory)
+	return order.GetController().CreateOrder(req.Data)
 }
