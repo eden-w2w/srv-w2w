@@ -23,10 +23,6 @@ func (req GetGoodsBooking) Path() string {
 	return "/:goodsID/booking"
 }
 
-type GetGoodsBookingResponse struct {
-	Booking bool `json:"booking"`
-}
-
 func (req GetGoodsBooking) Output(ctx context.Context) (result interface{}, err error) {
 	flows, err := booking_flow.GetController().GetBookingFlowByGoodsIDAndStatus(
 		req.GoodsID,
@@ -36,7 +32,7 @@ func (req GetGoodsBooking) Output(ctx context.Context) (result interface{}, err 
 		return
 	}
 	if len(flows) == 0 {
-		return &GetGoodsBookingResponse{Booking: false}, nil
+		return nil, nil
 	}
-	return &GetGoodsBookingResponse{Booking: true}, nil
+	return &flows[0], nil
 }

@@ -39,13 +39,15 @@ func (req GetMyOrders) Output(ctx context.Context) (result interface{}, err erro
 	var data = make([]order.GetMyOrdersResponse, 0)
 	for _, o := range orders {
 		orderResp := order.GetMyOrdersResponse{
-			OrderID:       o.OrderID,
-			UserID:        o.UserID,
-			TotalPrice:    o.TotalPrice,
-			PaymentMethod: o.PaymentMethod,
-			Status:        o.Status,
-			CreatedAt:     o.CreatedAt,
-			Goods:         make([]order.GoodsListResponse, 0),
+			OrderID:        o.OrderID,
+			UserID:         o.UserID,
+			TotalPrice:     o.TotalPrice,
+			DiscountAmount: o.DiscountAmount,
+			ActualAmount:   o.ActualAmount,
+			PaymentMethod:  o.PaymentMethod,
+			Status:         o.Status,
+			CreatedAt:      o.CreatedAt,
+			Goods:          make([]order.GoodsListResponse, 0),
 		}
 		logistics, err := order.GetController().GetOrderLogistics(o.OrderID)
 		if err != nil && err != errors.OrderNotFound {
@@ -64,7 +66,6 @@ func (req GetMyOrders) Output(ctx context.Context) (result interface{}, err erro
 				Comment:        g.Comment,
 				MainPicture:    g.MainPicture,
 				Specifications: g.Specifications,
-				Activities:     g.Activities,
 				Price:          g.Price,
 				Amount:         g.Amount,
 			})

@@ -3,6 +3,7 @@ package v0
 import (
 	"github.com/eden-framework/courier"
 	"github.com/eden-w2w/srv-w2w/internal/routers/middleware"
+	"github.com/eden-w2w/srv-w2w/internal/routers/v0/discounts"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/goods"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/orders"
 	"github.com/eden-w2w/srv-w2w/internal/routers/v0/payment"
@@ -33,4 +34,5 @@ func init() {
 	AuthRouter.Register(payment.Router)
 	AuthRouter.Register(promotion.Router)
 	AuthRouter.Register(settings.Router)
+	AuthRouter.Register(discounts.Router)
 }
