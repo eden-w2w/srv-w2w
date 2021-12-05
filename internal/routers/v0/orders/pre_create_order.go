@@ -26,6 +26,8 @@ func (req PreCreateOrder) Path() string {
 type PreCreateOrderResponse struct {
 	PreGoodsList  []order.PreCreateOrderGoodsParams `json:"preGoodsList"`
 	TotalPrice    uint64                            `json:"totalPrice"`
+	FreightName   string                            `json:"freightName"`
+	FreightPrice  uint64                            `json:"freightPrice"`
 	DiscountPrice uint64                            `json:"discountPrice"`
 	ActualPrice   uint64                            `json:"actualPrice"`
 }
@@ -37,7 +39,7 @@ func (req PreCreateOrder) Output(ctx context.Context) (result interface{}, err e
 	}
 
 	req.Data.UserID = user.UserID
-	preGoodsList, totalPrice, discountPrice, actualPrice, err := order.GetController().PreCreateOrder(req.Data)
+	preGoodsList, totalPrice, freightPrice, discountPrice, actualPrice, freightName, err := order.GetController().PreCreateOrder(req.Data)
 	if err != nil {
 		return
 	}
@@ -45,6 +47,8 @@ func (req PreCreateOrder) Output(ctx context.Context) (result interface{}, err e
 	return &PreCreateOrderResponse{
 		PreGoodsList:  preGoodsList,
 		TotalPrice:    totalPrice,
+		FreightName:   freightName,
+		FreightPrice:  freightPrice,
 		DiscountPrice: discountPrice,
 		ActualPrice:   actualPrice,
 	}, nil

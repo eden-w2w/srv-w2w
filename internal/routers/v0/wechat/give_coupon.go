@@ -33,7 +33,7 @@ func (req GiveCoupon) Output(ctx context.Context) (result interface{}, err error
 		return nil, errors.Unauthorized
 	}
 
-	id, _ := id_generator.GetGenerator().GenerateUniqueID()
+	id := id_generator.GetGenerator().GenerateUniqueID()
 	_, err = wechat.GetController().GiveCoupon(coupons.GiveCouponRequest{
 		StockID:           req.StockID,
 		OpenID:            &u.OpenID,

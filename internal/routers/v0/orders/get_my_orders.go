@@ -42,6 +42,7 @@ func (req GetMyOrders) Output(ctx context.Context) (result interface{}, err erro
 			OrderID:        o.OrderID,
 			UserID:         o.UserID,
 			TotalPrice:     o.TotalPrice,
+			FreightAmount:  o.FreightAmount,
 			DiscountAmount: o.DiscountAmount,
 			ActualAmount:   o.ActualAmount,
 			PaymentMethod:  o.PaymentMethod,
@@ -60,15 +61,17 @@ func (req GetMyOrders) Output(ctx context.Context) (result interface{}, err erro
 			return nil, err
 		}
 		for _, g := range goods {
-			orderResp.Goods = append(orderResp.Goods, order.GoodsListResponse{
-				GoodsID:        g.GoodsID,
-				Name:           g.Name,
-				Comment:        g.Comment,
-				MainPicture:    g.MainPicture,
-				Specifications: g.Specifications,
-				Price:          g.Price,
-				Amount:         g.Amount,
-			})
+			orderResp.Goods = append(
+				orderResp.Goods, order.GoodsListResponse{
+					GoodsID:        g.GoodsID,
+					Name:           g.Name,
+					Comment:        g.Comment,
+					MainPicture:    g.MainPicture,
+					Specifications: g.Specifications,
+					Price:          g.Price,
+					Amount:         g.Amount,
+				},
+			)
 		}
 		data = append(data, orderResp)
 	}

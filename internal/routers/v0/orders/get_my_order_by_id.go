@@ -40,6 +40,7 @@ func (req GetMyOrderByID) Output(ctx context.Context) (result interface{}, err e
 		NickName:       o.NickName,
 		OpenID:         o.UserOpenID,
 		TotalPrice:     o.TotalPrice,
+		FreightAmount:  o.FreightAmount,
 		DiscountAmount: o.DiscountAmount,
 		ActualAmount:   o.ActualAmount,
 		PaymentMethod:  o.PaymentMethod,

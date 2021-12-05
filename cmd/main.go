@@ -7,6 +7,7 @@ import (
 	"github.com/eden-w2w/lib-modules/modules/booking_flow"
 	"github.com/eden-w2w/lib-modules/modules/discounts"
 	"github.com/eden-w2w/lib-modules/modules/events"
+	"github.com/eden-w2w/lib-modules/modules/freight_template"
 	"github.com/eden-w2w/lib-modules/modules/goods"
 	"github.com/eden-w2w/lib-modules/modules/id_generator"
 	"github.com/eden-w2w/lib-modules/modules/order"
@@ -83,4 +84,5 @@ func initModules() {
 	settings.GetController().Init(global.Config.MasterDB)
 	booking_flow.GetController().Init(global.Config.MasterDB)
 	discounts.GetController().Init(global.Config.MasterDB)
+	freight_template.GetController().Init(global.Config.MasterDB)
 }
