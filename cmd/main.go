@@ -17,6 +17,7 @@ import (
 	"github.com/eden-w2w/lib-modules/modules/settlement_flow"
 	"github.com/eden-w2w/lib-modules/modules/user"
 	"github.com/eden-w2w/lib-modules/modules/wechat"
+	"github.com/eden-w2w/lib-modules/pkg/webhook"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
@@ -85,4 +86,5 @@ func initModules() {
 	booking_flow.GetController().Init(global.Config.MasterDB)
 	discounts.GetController().Init(global.Config.MasterDB)
 	freight_template.GetController().Init(global.Config.MasterDB)
+	webhook.GetInstance().MustInit(global.Config.MasterDB)
 }
