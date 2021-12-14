@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/eden-framework/courier"
 	"github.com/eden-framework/courier/httpx"
-	"github.com/eden-w2w/lib-modules/constants/enums"
 	"github.com/eden-w2w/lib-modules/modules/booking_flow"
 )
 
@@ -24,10 +23,7 @@ func (req GetGoodsBooking) Path() string {
 }
 
 func (req GetGoodsBooking) Output(ctx context.Context) (result interface{}, err error) {
-	flows, err := booking_flow.GetController().GetBookingFlowByGoodsIDAndStatus(
-		req.GoodsID,
-		enums.BOOKING_STATUS__PROCESS,
-	)
+	flows, err := booking_flow.GetController().GetBookingFlowByGoodsID(req.GoodsID)
 	if err != nil {
 		return
 	}
