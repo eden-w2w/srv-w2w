@@ -5,6 +5,7 @@ import (
 	"github.com/eden-framework/courier"
 	"github.com/eden-framework/courier/httpx"
 	errors "github.com/eden-w2w/lib-modules/constants/general_errors"
+	"github.com/eden-w2w/lib-modules/databases"
 	"github.com/eden-w2w/lib-modules/modules/user"
 	"github.com/eden-w2w/lib-modules/modules/wechat"
 )
@@ -24,6 +25,11 @@ func (req ExchangeSessionKey) Path() string {
 	return "/exchangeSessionKey"
 }
 
+type SessionResponse struct {
+	User  *databases.User `json:"user"`
+	IsNew bool            `json:"isNew"`
+}
+
 func (req ExchangeSessionKey) Output(ctx context.Context) (result interface{}, err error) {
 	sessionResp, err := wechat.GetController().Code2Session(req.Code)
 	if err != nil {
@@ -33,33 +39,47 @@ func (req ExchangeSessionKey) Output(ctx context.Context) (result interface{}, e
 	userCtrl := user.GetController()
 	u, dbErr := userCtrl.GetUserByOpenID(sessionResp.OpenID)
 	if u != nil {
-		err = userCtrl.UpdateUserInfo(u.UserID, user.UpdateUserInfoParams{
-			SessionKey: sessionResp.SessionKey,
-		})
+		err = userCtrl.UpdateUserInfo(
+			u.UserID, user.UpdateUserInfoParams{
+				SessionKey: sessionResp.SessionKey,
+			},
+		)
 		if err != nil {
 			return nil, err
 		}
 		// 刷新token并返回用户信息实体
-		return userCtrl.RefreshToken(u.UserID)
+		u, err = userCtrl.RefreshToken(u.UserID)
+		if err != nil {
+			return
+		}
+		result = SessionResponse{
+			User:  u,
+			IsNew: false,
+		}
+		return
 	} else {
 		if dbErr == errors.UserNotFound {
 			// 用户不存在则创建用户
-			u, dbErr = userCtrl.CreateUserByWechatSession(user.CreateUserByWechatSessionParams{
-				OpenID:     sessionResp.OpenID,
-				UnionID:    sessionResp.UnionID,
-				SessionKey: sessionResp.SessionKey,
-			})
+			u, dbErr = userCtrl.CreateUserByWechatSession(
+				user.CreateUserByWechatSessionParams{
+					OpenID:     sessionResp.OpenID,
+					UnionID:    sessionResp.UnionID,
+					SessionKey: sessionResp.SessionKey,
+				},
+			)
 			if dbErr != nil {
 				err = dbErr
 				return
 			}
+			result = SessionResponse{
+				User:  u,
+				IsNew: true,
+			}
+			return
 		} else {
 			// 数据库错误
 			err = dbErr
 			return
 		}
 	}
-
-	result = u
-	return
 }
